@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChefOps Planner</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">CO</div>
+        <div>
+          <span class="brand-kicker">ChefOps</span>
+          <span class="brand-name">Planner</span>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a class="nav-link active" href="#">
+          <span class="nav-icon">✦</span>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-link" href="#">
+          <span class="nav-icon">☏</span>
+          <span>Calendar</span>
+        </a>
+        <a class="nav-link" href="#">
+          <span class="nav-icon">☰</span>
+          <span>Menus</span>
+        </a>
+        <a class="nav-link" href="#">
+          <span class="nav-icon">◫</span>
+          <span>Clients</span>
+        </a>
+        <a class="nav-link" href="#">
+          <span class="nav-icon">◌</span>
+          <span>Groceries</span>
+        </a>
+        <a class="nav-link" href="#">
+          <span class="nav-icon">Σ</span>
+          <span>Profit</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-card">
+        <span class="mini-label">Today</span>
+        <div class="today-date" id="todayDate">Sunday, Sep 14</div>
+        <div class="today-events">
+          <span class="event-dot"></span>
+          <span>3 events scheduled</span>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="primary-button small-button">
+          <span>+</span>
+          Create Menu
+        </button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <section class="topbar">
+        <div>
+          <span class="section-label">Operations</span>
+          <h1>Chef Dashboard</h1>
+        </div>
+        <div class="topbar-actions">
+          <button class="ghost-button">This Week</button>
+          <button class="primary-button">
+            <span class="plus-icon">+</span>
+            Add Schedule
+          </button>
+        </div>
+      </section>
+
+      <section class="summary-grid">
+        <article class="summary-card">
+          <div class="summary-card-head">
+            <span class="summary-label">Scheduled Events</span>
+            <span class="summary-icon calendar-icon">◫</span>
+          </div>
+          <div class="summary-number" id="eventsCount">08</div>
+          <div class="summary-meta">
+            <span class="trend positive">+2 this week</span>
+          </div>
+        </article>
+
+        <article class="summary-card">
+          <div class="summary-card-head">
+            <span class="summary-label">Menu Requests</span>
+            <span class="summary-icon menu-icon">☰</span>
+          </div>
+          <div class="summary-number" id="requestCount">12</div>
+          <div class="summary-meta">
+            <span class="trend positive">+4 new</span>
+          </div>
+        </article>
+
+        <article class="summary-card">
+          <div class="summary-card-head">
+            <span class="summary-label">Grocery Costs</span>
+            <span class="summary-icon grocery-icon">✎</span>
+          </div>
+          <div class="summary-number" id="groceryCost">$428.50</div>
+          <div class="summary-meta">
+            <span class="trend warning">Forecast</span>
+          </div>
+        </article>
+
+        <article class="summary-card highlight-card">
+          <div class="summary-card-head">
+            <span class="summary-label">Net Profit</span>
+            <span class="summary-icon profit-icon">Σ</span>
+          </div>
+          <div class="summary-number" id="profitTotal">$2,440</div>
+          <div class="summary-meta">
+            <span class="trend positive">+18.2%</span>
+          </div>
+        </article>
+      </section>
+
+      <section class="workspace-grid">
+        <article class="panel calendar-panel">
+          <div class="panel-header">
+            <div>
+              <span class="panel-kicker">Schedule</span>
+              <h2>Calendar</h2>
+            </div>
+            <div class="panel-actions">
+              <button class="icon-button">‹</button>
+              <span class="month-title">September 2026</span>
+              <button class="icon-button">›</button>
+            </div>
+          </div>
+
+          <div class="calendar-grid">
+            <div class="cal-head">Mon</div>
+            <div class="cal-head">Tue</div>
+            <div class="cal-head">Wed</div>
+            <div class="cal-head">Thu</div>
+            <div class="cal-head">Fri</div>
+            <div class="cal-head">Sat</div>
+            <div class="cal-head">Sun</div>
+
+            <div class="cal-day muted-day"><span class="day-number">31</span></div>
+            <div class="cal-day"><span class="day-number">1</span><span class="event-chip event-green">Prep</span></div>
+            <div class="cal-day"><span class="day-number">2</span><span class="event-chip event-orange">Lunch</span></div>
+            <div class="cal-day"><span class="day-number">3</span></div>
+            <div class="cal-day"><span class="day-number">4</span><span class="event-chip event-blue">Market</span></div>
+            <div class="cal-day"><span class="day-number">5</span></div>
+            <div class="cal-day"><span class="day-number">6</span></div>
+
+            <div class="cal-day"><span class="day-number">7</span></div>
+            <div class="cal-day"><span class="day-number">8</span><span class="event-chip event-green">Menu</span></div>
+            <div class="cal-day"><span class="day-number">9</span></div>
+            <div class="cal-day"><span class="day-number">10</span><span class="event-chip event-red">Dinner</span></div>
+            <div class="cal-day"><span class="day-number">11</span></div>
+            <div class="cal-day"><span class="day-number">12</span></div>
+            <div class="cal-day"><span class="day-number">13</span></div>
+
+            <div class="cal-day"><span class="day-number">14</span><span class="event-chip event-orange">Family</span></div>
+            <div class="cal-day"><span class="day-number">15</span></div>
+            <div class="cal-day"><span class="day-number">16</span></div>
+            <div class="cal-day"><span class="day-number">17</span></div>
+            <div class="cal-day"><span class="day-number">18</span><span class="event-chip event-blue">Food Shop</span></div>
+            <div class="cal-day"><span class="day-number">19</span></div>
+            <div class="cal-day"><span class="day-number">20</span></div>
+          </div>
+        </article>
+
+        <article class="panel workload-panel">
+          <div class="panel-header compact">
+            <div>
+              <span class="panel-kicker">Daily Work</span>
+              <h2>Workload</h2>
+            </div>
+            <button class="icon-button small-icon">+</button>
+          </div>
+          <div class="timeline" id="timeline">
+            <div class="timeline-item">
+              <span class="time">08:30</span>
+              <span class="timeline-line"></span>
+              <div class="timeline-content">
+                <span class="timeline-title">Groceries delivery</span>
+                <span class="timeline-detail">Farm market pickup</span>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <span class="time">11:00</span>
+              <span class="timeline-line"></span>
+              <div class="timeline-content">
+                <span class="timeline-title">Menu planning</span>
+                <span class="timeline-detail">Client: Savory Table</span>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <span class="time">14:30</span>
+              <span class="timeline-line"></span>
+              <div class="timeline-content">
+                <span class="timeline-title">Kitchen prep</span>
+                <span class="timeline-detail">Set service station</span>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <span class="time">19:00</span>
+              <span class="timeline-line"></span>
+              <div class="timeline-content">
+                <span class="timeline-title">Dinner service</span>
+                <span class="timeline-detail">4 clients / 2 courses</span>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="management-grid">
+        <article class="panel planning-panel">
+          <div class="panel-header compact">
+            <div>
+              <span class="panel-kicker">Menu Planning</span>
+              <h2>Client Requests</h2>
+            </div>
+            <button class="primary-button small-button" id="addMenuButton">+ Add Menu</button>
+          </div>
+
+          <div class="menu-form-wrap">
+            <form class="menu-form" id="menuForm">
+              <div class="form-grid">
+                <label>
+                  <span class="field-label">Client</span>
+                  <input type="text" id="clientName" placeholder="Client name" required />
+                </label>
+                <label>
+                  <span class="field-label">Menu Style</span>
+                  <select id="menuStyle" required>
+                    <option>Seasonal Tasting</option>
+                    <option>Vegetarian Menu</option>
+                    <option>French Market</option>
+                    <option>Private Dining</option>
+                  </select>
+                </label>
+                <label>
+                  <span class="field-label">Guests</span>
+                  <input type="number" id="guestCount" min="1" value="8" required />
+                </label>
+                <label>
+                  <span class="field-label">Menu Price</span>
+                  <input type="number" id="menuPrice" min="1" value="420" required />
+                </label>
+                <label>
+                  <span class="field-label">Grocery Cost</span>
+                  <input type="number" id="groceryCostInput" min="1" value="180" required />
+                </label>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="primary-button small-button">Save Request</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="menu-list" id="menuList">
+            <div class="menu-row">
+              <div class="menu-row-main">
+                <span class="menu-client">Savory Table</span>
+                <span class="menu-detail">French Market · 8 guests</span>
+              </div>
+              <div class="menu-row-meta">
+                <span class="menu-price">$420</span>
+                <span class="menu-cost">Cost $180</span>
+                <span class="menu-profit">Profit $240</span>
+              </div>
+            </div>
+            <div class="menu-row">
+              <div class="menu-row-main">
+                <span class="menu-client">The Green Room</span>
+                <span class="menu-detail">Vegetarian Menu · 12 guests</span>
+              </div>
+              <div class="menu-row-meta">
+                <span class="menu-price">$560</span>
+                <span class="menu-cost">Cost $260</span>
+                <span class="menu-profit">Profit $300</span>
+              </div>
+            </div>
+            <div class="menu-row">
+              <div class="menu-row-main">
+                <span class="menu-client">Luna Catering</span>
+                <span class="menu-detail">Seasonal Tasting · 20 guests</span>
+              </div>
+              <div class="menu-row-meta">
+                <span class="menu-price">$980</span>
+                <span class="menu-cost">Cost $490</span>
+                <span class="menu-profit">Profit $490</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel profit-panel">
+          <div class="panel-header compact">
+            <div>
+              <span class="panel-kicker">Profit</span>
+              <h2>Analysis</h2>
+            </div>
+            <button class="icon-button small-icon">↧</button>
+          </div>
+
+          <div class="profit-summary">
+            <div class="profit-total">
+              <span class="profit-total-label">Net Profit</span>
+              <span class="profit-total-value" id="profitBig">$2,440</span>
+            </div>
+            <div class="profit-bars">
+              <div class="bar-row">
+                <span class="bar-label">Revenue</span>
+                <div class="bar-track">
+                  <div class="bar-fill green-fill" style="width: 76%;"></div>
+                </div>
+                <span class="bar-value">$3,062</span>
+              </div>
+              <div class="bar-row">
+                <span class="bar-label">Costs</span>
+                <div class="bar-track">
+                  <div class="bar-fill orange-fill" style="width: 44%;"></div>
+                </div>
+                <span class="bar-value">$622</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-title">
+              <span>Weekly Profit</span>
+              <span class="chart-label">+12%</span>
+            </div>
+            <div class="chart-bars">
+              <div class="chart-bar-wrap">
+                <span class="chart-bar" style="height: 30%;"></span>
+              </div>
+              <div class="chart-bar-wrap">
+                <span class="chart-bar" style="height: 50%;"></span>
+              </div>
+              <div class="chart-bar-wrap">
+                <span class="chart-bar" style="height: 38%;"></span>
+              </div>
+              <div class="chart-bar-wrap">
+                <span class="chart-bar" style="height: 60%;"></span>
+              </div>
+              <div class="chart-bar-wrap">
+                <span class="chart-bar" style="height: 76%;"></span>
+              </div>
+              <div class="chart-bar-wrap">
+                <span class="chart-bar" style="height: 55%;"></span>
+              </div>
+              <div class="chart-bar-wrap">
+                <span class="chart-bar" style="height: 68%;"></span>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+</html>

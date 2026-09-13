@@ -1,0 +1,13 @@
+# OS and editor artifacts
+.DS_Store
+Thumbs.db
+
+# Dependency folders
+node_modules/
+venv/
+.env
+
+# Build artifacts
+.DS_Store
+/dist/
+/build/
