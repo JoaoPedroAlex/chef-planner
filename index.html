@@ -322,18 +322,13 @@
                   <span class="field-label">Menu Description</span>
                   <textarea id="menuDescriptionInput" rows="2" placeholder="Short description for the menu"></textarea>
                 </label>
-                <label class="full-width">
-                  <span class="field-label">Plate Name</span>
-                  <input type="text" id="menuPlateNameInput" placeholder="e.g. Market starter" />
-                </label>
-                <label class="full-width">
-                  <span class="field-label">Plate Description</span>
-                  <textarea id="menuPlateDescriptionInput" rows="2" placeholder="Short plate description"></textarea>
-                </label>
-                <label class="full-width">
-                  <span class="field-label">Number of Plates</span>
-                  <input type="number" min="0" id="menuPlateCountInput" placeholder="e.g. 12" required />
-                </label>
+                <div class="full-width">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;">
+                    <span class="field-label">Plates</span>
+                    <button type="button" class="ghost-button small-button" id="addPlateRowButton">+ Add Plate</button>
+                  </div>
+                  <div id="menuPlatesContainer"></div>
+                </div>
               </div>
               <div class="menu-plate-preview-wrap">
                 <span class="mini-label">Plate preview</span>

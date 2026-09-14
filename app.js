@@ -13,9 +13,8 @@ const menuLibrary = document.getElementById('menuLibrary');
 const menuLibraryEditor = document.getElementById('menuLibraryEditor');
 const menuNameInput = document.getElementById('menuNameInput');
 const menuDescriptionInput = document.getElementById('menuDescriptionInput');
-const menuPlateNameInput = document.getElementById('menuPlateNameInput');
-const menuPlateDescriptionInput = document.getElementById('menuPlateDescriptionInput');
-const menuPlateCountInput = document.getElementById('menuPlateCountInput');
+const menuPlatesContainer = document.getElementById('menuPlatesContainer');
+const addPlateRowButton = document.getElementById('addPlateRowButton');
 const menuPlatePreview = document.getElementById('menuPlatePreview');
 const saveMenuLibraryButton = document.getElementById('saveMenuLibraryButton');
 const cancelMenuEditButton = document.getElementById('cancelMenuEditButton');
@@ -407,20 +406,46 @@ function renderMenus(items) {
   }).join('');
 }
 
-function renderMenuPlatePreview(value) {
-  if (!menuPlatePreview) {
-    return;
-  }
-
-  const previewText = normalizePlateLabel(value || '');
-  if (!previewText) {
-    menuPlatePreview.innerHTML = `<span class="preview-empty">No plate yet</span>`;
-    return;
-  }
-
-  menuPlatePreview.innerHTML = `<span class="menu-plate-chip">${previewText}</span>`;
+function createPlateRow(plate = {}) {
+  if (!menuPlatesContainer) return;
+  const normalized = normalizePlateObject(plate);
+  const row = document.createElement('div');
+  row.className = 'menu-plate-editor-row';
+  row.style.cssText = 'border:1px solid #dfd2b5;border-radius:12px;padding:14px;margin-bottom:12px;background:#fffdf8;';
+  row.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;"><span class="field-label plate-row-title">Plate</span><button type="button" class="row-action-button row-delete-button" data-remove-plate>Remove</button></div><label class="full-width" style="display:block;margin-bottom:10px;"><span class="field-label">Plate Name</span><input type="text" data-plate-name placeholder="e.g. Market starter"></label><label class="full-width" style="display:block;"><span class="field-label">Plate Description</span><textarea data-plate-description rows="3" placeholder="Short plate description"></textarea></label>`;
+  row.querySelector('[data-plate-name]').value = normalized.plateName;
+  row.querySelector('[data-plate-description]').value = normalized.plateDescription;
+  menuPlatesContainer.appendChild(row);
+  updatePlateRowsUi();
+  renderMenuPlatePreview();
 }
-
+function updatePlateRowsUi() {
+  if (!menuPlatesContainer) return;
+  const rows = Array.from(menuPlatesContainer.querySelectorAll('.menu-plate-editor-row'));
+  rows.forEach((row, index) => {
+    row.querySelector('.plate-row-title').textContent = `Plate ${index + 1}`;
+    row.querySelector('[data-remove-plate]').disabled = rows.length === 1;
+  });
+}
+function getPlateRowsData() {
+  if (!menuPlatesContainer) return [];
+  return Array.from(menuPlatesContainer.querySelectorAll('.menu-plate-editor-row')).map((row) => ({
+    plateName: String(row.querySelector('[data-plate-name]')?.value || '').trim(),
+    plateDescription: String(row.querySelector('[data-plate-description]')?.value || '').trim(),
+  })).filter((plate) => plate.plateName);
+}
+function resetPlateRows(plates = []) {
+  if (!menuPlatesContainer) return;
+  menuPlatesContainer.innerHTML = '';
+  (Array.isArray(plates) && plates.length ? plates : [{}]).forEach(createPlateRow);
+  updatePlateRowsUi();
+  renderMenuPlatePreview();
+}
+function renderMenuPlatePreview() {
+  if (!menuPlatePreview) return;
+  const plates = getPlateRowsData();
+  menuPlatePreview.innerHTML = plates.length ? plates.map((plate) => `<span class="menu-plate-chip">${plate.plateName}</span>`).join('') : `<span class="preview-empty">No plates yet</span>`;
+}
 function renderMenuLibrary() {
   if (!menuLibrary) {
     return;
@@ -662,6 +687,161 @@ function clearEditMode() {
   if (cancelEditButton) cancelEditButton.classList.add('hidden');
 }
 
+const backupDateStorageKey = 'chefops.lastBackupDate';
+
+function renderBackupBanner() {
+  const dashboard = document.getElementById('dashboard');
+  if (!dashboard) {
+    return;
+  }
+
+  document.getElementById('backupReminderBanner')?.remove();
+
+  const banner = document.createElement('div');
+  banner.id = 'backupReminderBanner';
+  banner.setAttribute('role', 'status');
+  banner.style.cssText = [
+    'grid-column: 1 / -1',
+    'display: flex',
+    'align-items: center',
+    'justify-content: space-between',
+    'gap: 16px',
+    'padding: 14px 16px',
+    'border-radius: 14px',
+    'font-weight: 600',
+    'box-sizing: border-box'
+  ].join(';');
+
+  const lastBackupValue = localStorage.getItem(backupDateStorageKey);
+  const lastBackupDate = lastBackupValue ? new Date(lastBackupValue) : null;
+  const validLastBackup = lastBackupDate && !Number.isNaN(lastBackupDate.getTime());
+  const daysSinceBackup = validLastBackup
+    ? Math.max(0, Math.floor((Date.now() - lastBackupDate.getTime()) / 86400000))
+    : null;
+
+  const message = document.createElement('span');
+  const exportButton = document.createElement('button');
+  exportButton.type = 'button';
+  exportButton.className = 'primary-button small-button';
+  exportButton.textContent = 'Export Backup';
+  exportButton.addEventListener('click', exportBackup);
+
+  if (!validLastBackup) {
+    banner.style.background = '#fff4d6';
+    banner.style.color = '#6f5200';
+    banner.style.border = '1px solid #f0d98c';
+    message.textContent = 'No backup has been created yet. Protect the menus and client requests by exporting a backup.';
+    banner.append(message, exportButton);
+  } else if (daysSinceBackup >= 14) {
+    banner.style.background = '#fff4d6';
+    banner.style.color = '#6f5200';
+    banner.style.border = '1px solid #f0d98c';
+    message.textContent = `Last backup was ${daysSinceBackup} days ago (${lastBackupDate.toLocaleString()}).`;
+    banner.append(message, exportButton);
+  } else {
+    banner.style.background = '#e9f8ef';
+    banner.style.color = '#256c3d';
+    banner.style.border = '1px solid #a7dfb6';
+    message.textContent = `Backup is current. Last export: ${lastBackupDate.toLocaleString()}.`;
+    banner.append(message);
+  }
+
+  dashboard.prepend(banner);
+}
+
+function exportBackup() {
+  const backup = {
+    app: 'ChefOps Planner',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    menus: JSON.parse(localStorage.getItem(menuStorageKey) || '[]'),
+    requests: JSON.parse(localStorage.getItem(storageKey) || '[]'),
+  };
+
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const downloadLink = document.createElement('a');
+  downloadLink.href = url;
+  downloadLink.download = `chefops-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  downloadLink.remove();
+  URL.revokeObjectURL(url);
+
+  localStorage.setItem(backupDateStorageKey, backup.exportedAt);
+  renderBackupBanner();
+}
+
+async function importBackupFile(file) {
+  const text = await file.text();
+  const backup = JSON.parse(text);
+
+  if (!backup || !Array.isArray(backup.menus) || !Array.isArray(backup.requests)) {
+    throw new Error('This is not a valid ChefOps backup file.');
+  }
+
+  localStorage.setItem(menuStorageKey, JSON.stringify(backup.menus));
+  localStorage.setItem(storageKey, JSON.stringify(backup.requests));
+
+  const importedDate = backup.exportedAt && !Number.isNaN(new Date(backup.exportedAt).getTime())
+    ? backup.exportedAt
+    : new Date().toISOString();
+  localStorage.setItem(backupDateStorageKey, importedDate);
+  window.location.reload();
+}
+
+function initializeBackupControls() {
+  if (document.getElementById('exportBackupButton')) {
+    return;
+  }
+
+  const target = document.querySelector('.topbar-actions');
+  if (!target) {
+    renderBackupBanner();
+    return;
+  }
+
+  const exportButton = document.createElement('button');
+  exportButton.id = 'exportBackupButton';
+  exportButton.type = 'button';
+  exportButton.className = 'ghost-button';
+  exportButton.textContent = 'Export Backup';
+  exportButton.addEventListener('click', exportBackup);
+
+  const importButton = document.createElement('button');
+  importButton.id = 'importBackupButton';
+  importButton.type = 'button';
+  importButton.className = 'ghost-button';
+  importButton.textContent = 'Import Backup';
+
+  const fileInput = document.createElement('input');
+  fileInput.id = 'importBackupInput';
+  fileInput.type = 'file';
+  fileInput.accept = 'application/json,.json';
+  fileInput.hidden = true;
+
+  importButton.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    try {
+      await importBackupFile(file);
+    } catch (error) {
+      console.error('Unable to import ChefOps backup.', error);
+      window.alert(error.message || 'Unable to import the selected backup file.');
+      fileInput.value = '';
+    }
+  });
+
+  target.prepend(importButton);
+  target.prepend(exportButton);
+  target.appendChild(fileInput);
+  renderBackupBanner();
+}
+
 let requests = [];
 
 async function boot() {
@@ -675,6 +855,8 @@ async function boot() {
   updateChefWorkflow(requests);
   renderMenuLibrary();
   syncMenuStyleOptions();
+  resetPlateRows();
+  initializeBackupControls();
 }
 
 boot();
@@ -712,18 +894,7 @@ if (addMenuLibraryButton) {
     if (menuDescriptionInput) {
       menuDescriptionInput.value = '';
     }
-    if (menuPlateNameInput) {
-      menuPlateNameInput.value = '';
-    }
-    if (menuPlateDescriptionInput) {
-      menuPlateDescriptionInput.value = '';
-    }
-    if (menuPlateCountInput) {
-      menuPlateCountInput.value = '';
-    }
-    if (menuPlatePreview) {
-      renderMenuPlatePreview('');
-    }
+    resetPlateRows();
     delete menuLibraryEditor.dataset.editingMenuId;
     if (saveMenuLibraryButton) {
       saveMenuLibraryButton.textContent = 'Save Menu';
@@ -845,9 +1016,16 @@ if (menuList) {
   });
 }
 
-if (menuPlateNameInput && menuPlatePreview) {
-  menuPlateNameInput.addEventListener('input', () => {
-    renderMenuPlatePreview(menuPlateNameInput.value);
+if (addPlateRowButton) addPlateRowButton.addEventListener('click', () => createPlateRow());
+if (menuPlatesContainer) {
+  menuPlatesContainer.addEventListener('input', renderMenuPlatePreview);
+  menuPlatesContainer.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-remove-plate]');
+    if (!button) return;
+    button.closest('.menu-plate-editor-row')?.remove();
+    if (!menuPlatesContainer.querySelector('.menu-plate-editor-row')) createPlateRow();
+    updatePlateRowsUi();
+    renderMenuPlatePreview();
   });
 }
 
@@ -872,20 +1050,13 @@ if (menuLibrary) {
 
     if (action === 'edit') {
       const target = sourceMenus.find((menu) => menu.id === menuId);
-      if (!target || !menuLibraryEditor || !menuNameInput || !menuPlateNameInput || !menuPlateDescriptionInput || !saveMenuLibraryButton) {
+      if (!target || !menuLibraryEditor || !menuNameInput || !menuPlatesContainer || !saveMenuLibraryButton) {
         return;
       }
-      const plate = Array.isArray(target.plates) && target.plates.length
-        ? normalizePlateObject(target.plates[0])
-        : { plateName: '', plateDescription: '' };
-
       menuLibraryEditor.dataset.editingMenuId = target.id;
       menuNameInput.value = target.name;
       menuDescriptionInput.value = target.description || '';
-      menuPlateNameInput.value = plate.plateName;
-      menuPlateDescriptionInput.value = plate.plateDescription;
-      menuPlateCountInput.value = Number(target.plateCount || target.plates.length || 0);
-      renderMenuPlatePreview(menuPlateNameInput.value);
+      resetPlateRows(Array.isArray(target.plates) ? target.plates : []);
       menuLibraryEditor.classList.remove('hidden');
       saveMenuLibraryButton.textContent = 'Update Menu';
       menuNameInput.focus();
@@ -899,26 +1070,9 @@ if (saveMenuLibraryButton) {
     const existingId = menuLibraryEditor?.dataset?.editingMenuId;
     const name = menuNameInput.value.trim();
     const description = menuDescriptionInput?.value.trim() || '';
-    const plateNameInput = menuPlateNameInput?.value.trim() || '';
-    const plateDescription = menuPlateDescriptionInput?.value.trim() || '';
-    const plateCount = Number(menuPlateCountInput?.value || 0);
-
-    if (!name || !plateNameInput || plateCount < 0) {
-      return;
-    }
-
-    const parsedPlateNames = platesToArray(plateNameInput);
-    const plates = parsedPlateNames.length
-      ? parsedPlateNames.map((plate, idx) => ({
-          plateName: String(plate || '').trim(),
-          plateDescription: idx === 0 ? plateDescription : '',
-        }))
-      : [{ plateName: '', plateDescription: '' }];
-
-    const cleanPlates = plates.filter((plate) => plate.plateName);
-    if (!cleanPlates.length) {
-      return;
-    }
+    const cleanPlates = getPlateRowsData();
+    const plateCount = cleanPlates.length;
+    if (!name || !cleanPlates.length) return;
 
     const nextMenus = [...sourceMenus];
     if (existingId) {
@@ -943,18 +1097,7 @@ if (saveMenuLibraryButton) {
     if (menuDescriptionInput) {
       menuDescriptionInput.value = '';
     }
-    if (menuPlateNameInput) {
-      menuPlateNameInput.value = '';
-    }
-    if (menuPlateDescriptionInput) {
-      menuPlateDescriptionInput.value = '';
-    }
-    if (menuPlateCountInput) {
-      menuPlateCountInput.value = '';
-    }
-    if (menuPlatePreview) {
-      renderMenuPlatePreview('');
-    }
+    resetPlateRows();
     delete menuLibraryEditor?.dataset.editingMenuId;
     if (saveMenuLibraryButton) {
       saveMenuLibraryButton.textContent = 'Save Menu';
@@ -973,18 +1116,7 @@ if (cancelMenuEditButton) {
     if (menuDescriptionInput) {
       menuDescriptionInput.value = '';
     }
-    if (menuPlateNameInput) {
-      menuPlateNameInput.value = '';
-    }
-    if (menuPlateDescriptionInput) {
-      menuPlateDescriptionInput.value = '';
-    }
-    if (menuPlateCountInput) {
-      menuPlateCountInput.value = '';
-    }
-    if (menuPlatePreview) {
-      renderMenuPlatePreview('');
-    }
+    resetPlateRows();
     delete menuLibraryEditor?.dataset.editingMenuId;
     if (saveMenuLibraryButton) {
       saveMenuLibraryButton.textContent = 'Save Menu';
