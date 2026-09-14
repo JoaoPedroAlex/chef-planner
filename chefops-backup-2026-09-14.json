@@ -1,0 +1,161 @@
+{
+  "app": "ChefOps Planner",
+  "version": 1,
+  "exportedAt": "2026-09-14T15:50:51.777Z",
+  "menus": [
+    {
+      "id": "menu-1",
+      "name": "French Market",
+      "plates": [
+        {
+          "plateName": "Market starter",
+          "plateDescription": ""
+        },
+        {
+          "plateName": "Bistro fish",
+          "plateDescription": ""
+        },
+        {
+          "plateName": "Pear tart",
+          "plateDescription": ""
+        }
+      ],
+      "description": "",
+      "plateCount": 3
+    },
+    {
+      "id": "menu-2",
+      "name": "Vegetarian Menu",
+      "plates": [
+        {
+          "plateName": "Root garden soup",
+          "plateDescription": ""
+        },
+        {
+          "plateName": "Saffron squash",
+          "plateDescription": ""
+        },
+        {
+          "plateName": "Herb tart",
+          "plateDescription": ""
+        }
+      ],
+      "description": "",
+      "plateCount": 3
+    },
+    {
+      "id": "menu-3",
+      "name": "Seasonal Tasting",
+      "plates": [
+        {
+          "plateName": "Garden salad",
+          "plateDescription": ""
+        },
+        {
+          "plateName": "Seasonal main",
+          "plateDescription": ""
+        },
+        {
+          "plateName": "Cedar pear",
+          "plateDescription": ""
+        }
+      ],
+      "description": "",
+      "plateCount": 3
+    },
+    {
+      "id": "menu-mu1f4i59",
+      "name": "FOUR SHORES. ONE TABLE.",
+      "description": "A personal expression of my love for Greece, Portugal, Jordan and the Levant.\nThis menu is not only about flavours. It is a story of culture, hospitality, and the warmth and generosity of the Mediterranean. Each dish brings together ingredients, traditions and memories from these shores, interpreted through my own culinary style.\nIt is food made to be shared, conversations to linger over, and a table that brings different cultures together.\nMEZZA\nAt the Heart of the Table",
+      "plates": [
+        {
+          "plateName": "Greece | Golden Filo & Feta",
+          "plateDescription": "Crispy golden filo pastry wrapped around creamy feta cheese, finished with thyme honey and toasted sesame seeds."
+        },
+        {
+          "plateName": "Jordan Meets Galicia | Hummus & Salsa Brava",
+          "plateDescription": "Silky homemade hummus with a sweet and smoky Spanish salsa brava, glossy cherry tomatoes, garlic and fresh mint."
+        },
+        {
+          "plateName": "Portugal Meets Jordan | Presunto, Medjool Dates & Algarve Cornbread",
+          "plateDescription": "Smoked Portuguese presunto with Jordanian Medjool dates, oregano, olives and crispy onions, infused with smoked Portuguese olive oil. Served over a light Algarve cornbread base enriched with brown butter, finished with cream cheese and pistachios."
+        }
+      ],
+      "plateCount": 3
+    }
+  ],
+  "requests": [
+    {
+      "id": "sample-1",
+      "client": "Savory Table",
+      "style": "French Market",
+      "guests": 8,
+      "price": 420,
+      "grocery": 180,
+      "date": "2026-09-14",
+      "plates": [
+        "Market starter",
+        "Bistro fish",
+        "Pear tart"
+      ],
+      "allergies": "",
+      "address": "",
+      "eventTime": ""
+    },
+    {
+      "id": "sample-2",
+      "client": "The Green Room",
+      "style": "Vegetarian Menu",
+      "guests": 12,
+      "price": 560,
+      "grocery": 260,
+      "date": "2026-09-16",
+      "plates": [
+        "Root garden soup",
+        "Saffron squash",
+        "Herb tart"
+      ],
+      "allergies": "",
+      "address": "",
+      "eventTime": ""
+    },
+    {
+      "id": "sample-3",
+      "client": "Luna Catering",
+      "style": "Seasonal Tasting",
+      "guests": 20,
+      "price": 980,
+      "grocery": 490,
+      "date": "2026-09-18",
+      "plates": [
+        "Garden salad",
+        "Seasonal main",
+        "Cedar pear"
+      ],
+      "allergies": "",
+      "address": "",
+      "eventTime": ""
+    },
+    {
+      "id": "request-mu1f6fjq-mkqzqxu6edo",
+      "client": "JPA",
+      "style": "FOUR SHORES. ONE TABLE.",
+      "guests": 8,
+      "date": "2026-10-06",
+      "price": 420,
+      "grocery": 180,
+      "allergies": "",
+      "address": "Portimão",
+      "eventTime": "19:00",
+      "plates": [
+        "Greece",
+        "Golden Filo & Feta",
+        "Jordan Meets Galicia",
+        "Hummus & Salsa Brava",
+        "Portugal Meets Jordan",
+        "Presunto",
+        "Medjool Dates & Algarve Cornbread"
+      ]
+    }
+  ]
+}
