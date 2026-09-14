@@ -24,6 +24,8 @@ const storageKey = 'chefops.planner.requests';
 
 let menus = [];
 
+let currentCalendarDate = new Date();
+
 const samples = [
   {
     id: 'sample-1',
@@ -363,14 +365,33 @@ function platesToArray(value) {
 }
 
 function getDefaultPlatesForStyle(style) {
-  const menu = getStoredMenus().find((item) => item.name === style);
+  const menu = getStoredMenus().find(
+    (item) => item.name === style
+  );
+
   if (!menu || !Array.isArray(menu.plates)) {
     return [];
   }
 
   return menu.plates
     .map((plate) => normalizePlateLabel(plate))
-    .filter(Boolean);
+    .filter(Boolean)
+    .filter((text) => {
+      // Ignore descriptions
+      if (text.length > 60) {
+        return false;
+      }
+
+      // Ignore menu section headings
+      if (
+        text.toUpperCase() === text &&
+        text.split(' ').length > 2
+      ) {
+        return false;
+      }
+
+      return true;
+    });
 }
 
 function buildGoogleCalendarUrl(request) {
@@ -556,12 +577,9 @@ function renderCalendar(items) {
     return;
   }
 
-  const source = items.length ? items : samples;
-  const baseDate = source[0]?.date || '2026-09-01';
-  const firstSelectedDate = new Date(baseDate + 'T00:00:00');
-  const year = firstSelectedDate.getFullYear();
-  const month = firstSelectedDate.getMonth();
-  const monthName = firstSelectedDate.toLocaleString(undefined, { month: 'long' });
+  const year = currentCalendarDate.getFullYear();
+  const month = currentCalendarDate.getMonth();
+  const monthName = currentCalendarDate.toLocaleString(undefined, { month: 'long' });
 
   if (calendarMonthTitle) {
     calendarMonthTitle.textContent = `${monthName} ${year}`;

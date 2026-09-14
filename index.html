@@ -130,9 +130,9 @@
               <h2>Calendar</h2>
             </div>
             <div class="panel-actions">
-              <button class="icon-button">‹</button>
+              <button class="icon-button" id="prevMonthButton" type="button" aria-label="Previous month">‹</button>
               <span class="month-title">September 2026</span>
-              <button class="icon-button">›</button>
+              <button class="icon-button" id="nextMonthButton" type="button" aria-label="Next month">›</button>
             </div>
           </div>
 
@@ -452,5 +452,88 @@
   </div>
 
   <script src="app.js"></script>
+  <script>
+    (() => {
+      let calendarViewDate = null;
+
+      renderCalendar = function renderCalendarWithNavigation(items) {
+        if (!calendarGrid) {
+          return;
+        }
+
+        const calendarItems = Array.isArray(items) ? items : [];
+
+        if (!calendarViewDate) {
+          const source = calendarItems.length ? calendarItems : samples;
+          const baseDate = source[0]?.date || new Date().toISOString().slice(0, 10);
+          const initialDate = new Date(baseDate + 'T00:00:00');
+          calendarViewDate = Number.isNaN(initialDate.getTime())
+            ? new Date()
+            : new Date(initialDate.getFullYear(), initialDate.getMonth(), 1);
+        }
+
+        const year = calendarViewDate.getFullYear();
+        const month = calendarViewDate.getMonth();
+        const monthName = calendarViewDate.toLocaleString(undefined, { month: 'long' });
+
+        if (calendarMonthTitle) {
+          calendarMonthTitle.textContent = `${monthName} ${year}`;
+        }
+
+        const header = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const cells = header.map((label) => `<div class="cal-head">${label}</div>`);
+        const firstDay = new Date(year, month, 1);
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const startOffset = (firstDay.getDay() + 6) % 7;
+        const daysInPreviousMonth = new Date(year, month, 0).getDate();
+
+        for (let i = 0; i < startOffset; i += 1) {
+          const dayNumber = daysInPreviousMonth - startOffset + i + 1;
+          cells.push(`<div class="cal-day muted-day"><span class="day-number">${dayNumber}</span></div>`);
+        }
+
+        for (let day = 1; day <= daysInMonth; day += 1) {
+          const date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          const events = calendarItems.filter((item) => item.date === date);
+          const dayChips = events.map((event, index) => {
+            const palette = ['event-green', 'event-orange', 'event-blue', 'event-red'][index % 4];
+            return `<span class="event-chip ${palette}">${event.style}</span>`;
+          }).join('');
+          cells.push(`<div class="cal-day"><span class="day-number">${day}</span>${dayChips}</div>`);
+        }
+
+        const remainder = (7 - (cells.length % 7)) % 7;
+        for (let day = 1; day <= remainder; day += 1) {
+          cells.push(`<div class="cal-day muted-day"><span class="day-number">${day}</span></div>`);
+        }
+
+        calendarGrid.innerHTML = cells.join('');
+      };
+
+      document.getElementById('prevMonthButton')?.addEventListener('click', () => {
+        if (!calendarViewDate) {
+          renderCalendar(requests);
+        }
+        calendarViewDate = new Date(
+          calendarViewDate.getFullYear(),
+          calendarViewDate.getMonth() - 1,
+          1
+        );
+        renderCalendar(requests);
+      });
+
+      document.getElementById('nextMonthButton')?.addEventListener('click', () => {
+        if (!calendarViewDate) {
+          renderCalendar(requests);
+        }
+        calendarViewDate = new Date(
+          calendarViewDate.getFullYear(),
+          calendarViewDate.getMonth() + 1,
+          1
+        );
+        renderCalendar(requests);
+      });
+    })();
+  </script>
 </body>
 </html>
