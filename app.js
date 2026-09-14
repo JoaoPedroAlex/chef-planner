@@ -19,12 +19,10 @@ const menuPlateCountInput = document.getElementById('menuPlateCountInput');
 const menuPlatePreview = document.getElementById('menuPlatePreview');
 const saveMenuLibraryButton = document.getElementById('saveMenuLibraryButton');
 const cancelMenuEditButton = document.getElementById('cancelMenuEditButton');
-const API_BASE = 'http://127.0.0.1:3000';
 const storageKey = 'chefops.planner.requests';
+const menuStorageKey = 'chefops.planner.menus';
 
 let menus = [];
-
-let currentCalendarDate = new Date();
 
 const samples = [
   {
@@ -82,80 +80,42 @@ function generateRequestId() {
 }
 
 async function loadRequests() {
-  try {
-    const response = await fetch(`${API_BASE}/api/requests`);
-    if (!response.ok) {
-      throw new Error(`API returned ${response.status}`);
-    }
+  const savedRequests = localStorage.getItem(storageKey);
 
-    const parsed = await response.json();
-    if (!Array.isArray(parsed) || parsed.length === 0) {
-      return [...samples];
+  if (!savedRequests) {
+    localStorage.setItem(storageKey, JSON.stringify(samples));
+    return [...samples];
+  }
+
+  try {
+    const parsed = JSON.parse(savedRequests);
+    if (!Array.isArray(parsed)) {
+      throw new Error('Saved requests are not an array.');
     }
 
     return parsed.map((item) => ({
       ...item,
       id: item.id || generateRequestId(),
-      guests: Number(item.guests),
-      price: Number(item.price),
-      grocery: Number(item.grocery),
+      guests: Number(item.guests || 0),
+      price: Number(item.price || 0),
+      grocery: Number(item.grocery || 0),
       date: item.date || new Date().toISOString().slice(0, 10),
       allergies: item.allergies || '',
       address: item.address || '',
       eventTime: item.eventTime || '',
+      plates: Array.isArray(item.plates) ? item.plates : platesToArray(item.plates || ''),
     }));
   } catch (error) {
-    const savedRequests = localStorage.getItem(storageKey);
-
-    if (!savedRequests) {
-      localStorage.setItem(storageKey, JSON.stringify(samples));
-      return [...samples];
-    }
-
-    try {
-      const parsed = JSON.parse(savedRequests);
-      if (!Array.isArray(parsed) || parsed.length === 0) {
-        return [...samples];
-      }
-
-      return parsed.map((item) => ({
-        ...item,
-        id: item.id || generateRequestId(),
-        guests: Number(item.guests),
-        price: Number(item.price),
-        grocery: Number(item.grocery),
-        date: item.date || new Date().toISOString().slice(0, 10),
-        allergies: item.allergies || '',
-        address: item.address || '',
-        eventTime: item.eventTime || '',
-      }));
-    } catch (fallbackError) {
-      return [...samples];
-    }
+    console.warn('Unable to read requests from localStorage. Using sample requests.', error);
+    localStorage.setItem(storageKey, JSON.stringify(samples));
+    return [...samples];
   }
 }
 
 async function saveRequests(items) {
-  try {
-    const response = await fetch(`${API_BASE}/api/requests`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(items),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API returned ${response.status}`);
-    }
-
-    const saved = await response.json();
-    localStorage.setItem(storageKey, JSON.stringify(saved));
-    return saved;
-  } catch (error) {
-    localStorage.setItem(storageKey, JSON.stringify(items));
-    return items;
-  }
+  const normalized = Array.isArray(items) ? items : [];
+  localStorage.setItem(storageKey, JSON.stringify(normalized));
+  return normalized;
 }
 
 function calculateProfit(price, grocery) {
@@ -180,15 +140,17 @@ function formatMenuDate(dateValue) {
 }
 
 async function loadMenus() {
-  try {
-    const response = await fetch(`${API_BASE}/api/menus`);
-    if (!response.ok) {
-      throw new Error(`API returned ${response.status}`);
-    }
+  const savedMenus = localStorage.getItem(menuStorageKey);
 
-    const parsed = await response.json();
-    if (!Array.isArray(parsed) || parsed.length === 0) {
-      return [...defaultMenus];
+  if (!savedMenus) {
+    localStorage.setItem(menuStorageKey, JSON.stringify(defaultMenus));
+    return [...defaultMenus];
+  }
+
+  try {
+    const parsed = JSON.parse(savedMenus);
+    if (!Array.isArray(parsed)) {
+      throw new Error('Saved menus are not an array.');
     }
 
     return parsed.map((item) => {
@@ -208,40 +170,33 @@ async function loadMenus() {
       };
     });
   } catch (error) {
+    console.warn('Unable to read menus from localStorage. Using default menus.', error);
+    localStorage.setItem(menuStorageKey, JSON.stringify(defaultMenus));
     return [...defaultMenus];
   }
 }
 
 async function saveMenus(items) {
-  try {
-    const normalizedForServer = items.map((item) => ({
+  const normalized = (Array.isArray(items) ? items : []).map((item) => {
+    const plates = Array.isArray(item.plates)
+      ? item.plates.map((plate) => normalizePlateObject(plate)).filter((plate) => plate.plateName)
+      : typeof item.plates === 'string'
+        ? platesToArray(item.plates).map((plateName) => ({ plateName, plateDescription: '' }))
+        : [];
+
+    return {
       ...item,
-      plates: Array.isArray(item.plates)
-        ? item.plates.map((plate) => normalizePlateObject(plate))
-        : typeof item.plates === 'string'
-          ? platesToArray(item.plates)
-          : [],
-    }));
+      id: item.id || `menu-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`,
+      name: String(item.name || '').trim(),
+      description: String(item.description || '').trim(),
+      plates,
+      plateCount: Number(item.plateCount || plates.length || 0),
+    };
+  });
 
-    const response = await fetch(`${API_BASE}/api/menus`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(normalizedForServer),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API returned ${response.status}`);
-    }
-
-    const saved = await response.json();
-    menus = Array.isArray(saved) ? saved : normalizedForServer;
-    return menus;
-  } catch (error) {
-    menus = Array.isArray(items) ? items : [...defaultMenus];
-    return menus;
-  }
+  localStorage.setItem(menuStorageKey, JSON.stringify(normalized));
+  menus = normalized;
+  return normalized;
 }
 
 function getStoredMenus() {
@@ -365,33 +320,14 @@ function platesToArray(value) {
 }
 
 function getDefaultPlatesForStyle(style) {
-  const menu = getStoredMenus().find(
-    (item) => item.name === style
-  );
-
+  const menu = getStoredMenus().find((item) => item.name === style);
   if (!menu || !Array.isArray(menu.plates)) {
     return [];
   }
 
   return menu.plates
     .map((plate) => normalizePlateLabel(plate))
-    .filter(Boolean)
-    .filter((text) => {
-      // Ignore descriptions
-      if (text.length > 60) {
-        return false;
-      }
-
-      // Ignore menu section headings
-      if (
-        text.toUpperCase() === text &&
-        text.split(' ').length > 2
-      ) {
-        return false;
-      }
-
-      return true;
-    });
+    .filter(Boolean);
 }
 
 function buildGoogleCalendarUrl(request) {
@@ -577,9 +513,12 @@ function renderCalendar(items) {
     return;
   }
 
-  const year = currentCalendarDate.getFullYear();
-  const month = currentCalendarDate.getMonth();
-  const monthName = currentCalendarDate.toLocaleString(undefined, { month: 'long' });
+  const source = items.length ? items : samples;
+  const baseDate = source[0]?.date || '2026-09-01';
+  const firstSelectedDate = new Date(baseDate + 'T00:00:00');
+  const year = firstSelectedDate.getFullYear();
+  const month = firstSelectedDate.getMonth();
+  const monthName = firstSelectedDate.toLocaleString(undefined, { month: 'long' });
 
   if (calendarMonthTitle) {
     calendarMonthTitle.textContent = `${monthName} ${year}`;
