@@ -30,7 +30,7 @@ The project currently uses a static HTML, CSS, and JavaScript prototype. A produ
 - Backend: Node.js, Python Flask, or NestJS
 - Database: PostgreSQL or SQLite
 - Calendar integration: Google Calendar API
-- Authentication and user accounts with role-based access
+- Single-chef workflow with no authentication layer
 
 ## Local Usage
 

@@ -18,27 +18,27 @@
       </div>
 
       <nav class="nav">
-        <a class="nav-link active" href="#">
+        <a class="nav-link active" href="#dashboard">
           <span class="nav-icon">✦</span>
           <span>Dashboard</span>
         </a>
-        <a class="nav-link" href="#">
+        <a class="nav-link" href="#calendar">
           <span class="nav-icon">☏</span>
           <span>Calendar</span>
         </a>
-        <a class="nav-link" href="#">
+        <a class="nav-link" href="#menus">
           <span class="nav-icon">☰</span>
           <span>Menus</span>
         </a>
-        <a class="nav-link" href="#">
+        <a class="nav-link" href="#clients">
           <span class="nav-icon">◫</span>
           <span>Clients</span>
         </a>
-        <a class="nav-link" href="#">
+        <a class="nav-link" href="#groceries">
           <span class="nav-icon">◌</span>
           <span>Groceries</span>
         </a>
-        <a class="nav-link" href="#">
+        <a class="nav-link" href="#profit">
           <span class="nav-icon">Σ</span>
           <span>Profit</span>
         </a>
@@ -76,7 +76,7 @@
         </div>
       </section>
 
-      <section class="summary-grid">
+      <section class="summary-grid" id="dashboard">
         <article class="summary-card">
           <div class="summary-card-head">
             <span class="summary-label">Scheduled Events</span>
@@ -110,7 +110,7 @@
           </div>
         </article>
 
-        <article class="summary-card highlight-card">
+        <article class="summary-card highlight-card" id="profit">
           <div class="summary-card-head">
             <span class="summary-label">Net Profit</span>
             <span class="summary-icon profit-icon">Σ</span>
@@ -123,7 +123,7 @@
       </section>
 
       <section class="workspace-grid">
-        <article class="panel calendar-panel">
+        <article class="panel calendar-panel" id="calendar">
           <div class="panel-header">
             <div>
               <span class="panel-kicker">Schedule</span>
@@ -136,7 +136,7 @@
             </div>
           </div>
 
-          <div class="calendar-grid">
+          <div class="calendar-grid" id="calendarGrid">
             <div class="cal-head">Mon</div>
             <div class="cal-head">Tue</div>
             <div class="cal-head">Wed</div>
@@ -144,30 +144,6 @@
             <div class="cal-head">Fri</div>
             <div class="cal-head">Sat</div>
             <div class="cal-head">Sun</div>
-
-            <div class="cal-day muted-day"><span class="day-number">31</span></div>
-            <div class="cal-day"><span class="day-number">1</span><span class="event-chip event-green">Prep</span></div>
-            <div class="cal-day"><span class="day-number">2</span><span class="event-chip event-orange">Lunch</span></div>
-            <div class="cal-day"><span class="day-number">3</span></div>
-            <div class="cal-day"><span class="day-number">4</span><span class="event-chip event-blue">Market</span></div>
-            <div class="cal-day"><span class="day-number">5</span></div>
-            <div class="cal-day"><span class="day-number">6</span></div>
-
-            <div class="cal-day"><span class="day-number">7</span></div>
-            <div class="cal-day"><span class="day-number">8</span><span class="event-chip event-green">Menu</span></div>
-            <div class="cal-day"><span class="day-number">9</span></div>
-            <div class="cal-day"><span class="day-number">10</span><span class="event-chip event-red">Dinner</span></div>
-            <div class="cal-day"><span class="day-number">11</span></div>
-            <div class="cal-day"><span class="day-number">12</span></div>
-            <div class="cal-day"><span class="day-number">13</span></div>
-
-            <div class="cal-day"><span class="day-number">14</span><span class="event-chip event-orange">Family</span></div>
-            <div class="cal-day"><span class="day-number">15</span></div>
-            <div class="cal-day"><span class="day-number">16</span></div>
-            <div class="cal-day"><span class="day-number">17</span></div>
-            <div class="cal-day"><span class="day-number">18</span><span class="event-chip event-blue">Food Shop</span></div>
-            <div class="cal-day"><span class="day-number">19</span></div>
-            <div class="cal-day"><span class="day-number">20</span></div>
           </div>
         </article>
 
@@ -216,8 +192,53 @@
         </article>
       </section>
 
+      <section class="workflow-strip" id="groceries">
+        <article class="panel workflow-panel">
+          <div class="panel-header compact">
+            <div>
+              <span class="panel-kicker">Kitchen Flow</span>
+              <h2>Chef Workflow</h2>
+            </div>
+            <span class="panel-tag">Today</span>
+          </div>
+          <div class="workflow-grid">
+            <div class="workflow-card">
+              <span class="mini-label">Prep Order</span>
+              <div class="workflow-value" id="prepOrder">01 · First Menu</div>
+              <div class="workflow-detail" id="prepDetail">Prep equipment and mise en place</div>
+            </div>
+            <div class="workflow-card">
+              <span class="mini-label">Grocery List</span>
+              <div class="workflow-value" id="groceryList">Farm market pickup</div>
+              <div class="workflow-detail" id="groceryDetail">Budget $180</div>
+            </div>
+            <div class="workflow-card">
+              <span class="mini-label">Requested Menu</span>
+              <div class="workflow-value" id="serviceMenu">French Market</div>
+              <div class="workflow-detail" id="serviceDetail">8 guests · Sun, Sep 14</div>
+            </div>
+          </div>
+          <div class="workflow-checklist">
+            <span class="mini-label">Kitchen Checklist</span>
+            <ul class="prep-checklist" id="prepChecklist">
+              <li>Station setup</li>
+              <li>Ingredient check</li>
+              <li>Service call</li>
+            </ul>
+          </div>
+          <div class="workflow-shopping">
+            <span class="mini-label">Shopping List</span>
+            <div class="shopping-list" id="shoppingList">
+              <span class="shopping-item">Market produce</span>
+              <span class="shopping-item">Fresh herbs</span>
+              <span class="shopping-item">Chef sauces</span>
+            </div>
+          </div>
+        </article>
+      </section>
+
       <section class="management-grid">
-        <article class="panel planning-panel">
+        <article class="panel planning-panel" id="clients">
           <div class="panel-header compact">
             <div>
               <span class="panel-kicker">Menu Planning</span>
@@ -247,6 +268,10 @@
                   <input type="number" id="guestCount" min="1" value="8" required />
                 </label>
                 <label>
+                  <span class="field-label">Event Date</span>
+                  <input type="date" id="eventDate" value="2026-09-14" required />
+                </label>
+                <label>
                   <span class="field-label">Menu Price</span>
                   <input type="number" id="menuPrice" min="1" value="420" required />
                 </label>
@@ -254,11 +279,73 @@
                   <span class="field-label">Grocery Cost</span>
                   <input type="number" id="groceryCostInput" min="1" value="180" required />
                 </label>
+                <label>
+                  <span class="field-label">Allergies</span>
+                  <input type="text" id="allergiesInput" placeholder="e.g. nuts, shellfish" />
+                </label>
+                <label>
+                  <span class="field-label">Client Address</span>
+                  <input type="text" id="clientAddressInput" placeholder="House address" />
+                </label>
+                <label>
+                  <span class="field-label">Event Time</span>
+                  <input type="time" id="eventTimeInput" value="19:00" />
+                </label>
+                <label class="full-width">
+                  <span class="field-label">Requested Plates</span>
+                  <textarea id="requestPlatesInput" rows="4" placeholder="Plate 1, Plate 2, Plate 3"></textarea>
+                </label>
               </div>
               <div class="form-actions">
-                <button type="submit" class="primary-button small-button">Save Request</button>
+                <button type="button" class="ghost-button small-button hidden" id="cancelEditButton">Cancel Edit</button>
+                <button type="submit" class="primary-button small-button" id="saveMenuButton">Save Request</button>
               </div>
             </form>
+          </div>
+
+          <div class="menu-library-wrap" id="menus">
+            <div class="menu-library-head">
+              <div>
+                <span class="panel-kicker">Menu Book</span>
+                <h3>Menus</h3>
+              </div>
+              <button class="primary-button small-button" id="addMenuLibraryButton">+ Add Menu</button>
+            </div>
+
+            <div class="menu-library-editor hidden" id="menuLibraryEditor">
+              <div class="form-grid">
+                <label class="full-width">
+                  <span class="field-label">Menu Name</span>
+                  <input type="text" id="menuNameInput" placeholder="e.g. French Market" required />
+                </label>
+                <label class="full-width">
+                  <span class="field-label">Menu Description</span>
+                  <textarea id="menuDescriptionInput" rows="2" placeholder="Short description for the menu"></textarea>
+                </label>
+                <label class="full-width">
+                  <span class="field-label">Plate Name</span>
+                  <input type="text" id="menuPlateNameInput" placeholder="e.g. Market starter" />
+                </label>
+                <label class="full-width">
+                  <span class="field-label">Plate Description</span>
+                  <textarea id="menuPlateDescriptionInput" rows="2" placeholder="Short plate description"></textarea>
+                </label>
+                <label class="full-width">
+                  <span class="field-label">Number of Plates</span>
+                  <input type="number" min="0" id="menuPlateCountInput" placeholder="e.g. 12" required />
+                </label>
+              </div>
+              <div class="menu-plate-preview-wrap">
+                <span class="mini-label">Plate preview</span>
+                <div class="menu-plate-preview" id="menuPlatePreview"></div>
+              </div>
+              <div class="form-actions">
+                <button type="button" class="ghost-button small-button hidden" id="cancelMenuEditButton">Cancel</button>
+                <button type="button" class="primary-button small-button" id="saveMenuLibraryButton">Save Menu</button>
+              </div>
+            </div>
+
+            <div class="menu-library-list" id="menuLibrary"></div>
           </div>
 
           <div class="menu-list" id="menuList">
@@ -366,5 +453,4 @@
 
   <script src="app.js"></script>
 </body>
-</html>
 </html>
