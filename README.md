@@ -34,7 +34,10 @@ The project currently uses a static HTML, CSS, and JavaScript prototype. A produ
 
 ## Local Usage
 
-Open the static HTML file directly in a browser or run a local static server:
+Open the static HTML file directly in a browser: https://joaopedroalex.github.io/chef-planner/
+
+
+or run a local static server:
 
 ```bash
 python3 -m http.server 8000
