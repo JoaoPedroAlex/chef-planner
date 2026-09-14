@@ -114,6 +114,35 @@ test('PUT /api/menus accepts an explicit user-written plate count', async () => 
   await request('PUT', 'http://127.0.0.1:3000/api/menus', before.body);
 });
 
+test('PUT /api/requests normalizes paragraph plate import into cleaned plate names', async () => {
+  const before = await request('GET', baseUrl);
+  const incoming = [
+    {
+      id: 'sample-request-para-clean',
+      client: 'Paragraph Client',
+      style: 'French Market',
+      guests: 8,
+      price: 420,
+      grocery: 180,
+      date: '2026-09-14',
+      allergies: 'None',
+      address: '21 Market Street',
+      eventTime: '19:00',
+      plates: 'A personal expression of my love for Greece\nPortugal\nJordan and the Levant.\nThis menu is not only about flavours. It is a story of culture',
+    },
+  ];
+
+  const resp = await request('PUT', baseUrl, incoming);
+  assert.equal(resp.status, 200);
+  assert.equal(resp.body.length, 1);
+  assert.ok(Array.isArray(resp.body[0].plates));
+  assert.ok(resp.body[0].plates.length >= 4);
+  assert.equal(resp.body[0].plates[0], 'A personal expression of my love for Greece');
+  assert.ok(!resp.body[0].plates.some((plate) => /This menu is not only about flavours/.test(plate)));
+
+  await request('PUT', baseUrl, before.body);
+});
+
 test('PUT /api/requests persists an updated request array', async () => {
   const before = await request('GET', baseUrl);
   const incoming = [

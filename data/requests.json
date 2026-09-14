@@ -1,0 +1,29 @@
+[
+  {
+    "id": "sample-1",
+    "client": "Savory Table",
+    "style": "French Market",
+    "guests": 8,
+    "price": 420,
+    "grocery": 180,
+    "date": "2026-09-14"
+  },
+  {
+    "id": "sample-2",
+    "client": "The Green Room",
+    "style": "Vegetarian Menu",
+    "guests": 12,
+    "price": 560,
+    "grocery": 260,
+    "date": "2026-09-16"
+  },
+  {
+    "id": "sample-3",
+    "client": "Luna Catering",
+    "style": "Seasonal Tasting",
+    "guests": 20,
+    "price": 980,
+    "grocery": 490,
+    "date": "2026-09-18"
+  }
+]

@@ -335,6 +335,106 @@ function normalizePlatesFromDb(value) {
   }
 }
 
+function cleanIncomingPlateNames(value) {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => {
+        if (typeof item === 'string') {
+          return item.trim();
+        }
+        if (item && typeof item === 'object') {
+          return String(item.plateName || item.name || item.title || '').trim();
+        }
+        return '';
+      })
+      .filter(Boolean)
+      .filter((item) => item.length >= 2 && /[a-z]/i.test(item));
+  }
+
+  if (typeof value === 'string') {
+    const rawText = String(value)
+      .replace(/\r/g, '\n')
+      .replace(/[•·]/g, '\n')
+      .replace(/[—–]/g, ' ');
+
+    const rawLines = rawText
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    const candidateLines = rawLines.length > 1
+      ? rawLines
+      : rawText
+        .split(/(?<=[.!?])\s+|\s*[,;|]\s*/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+    if (!candidateLines.length) {
+      return [];
+    }
+
+    const ignoredLinePatterns = [
+      /^four shores?\.?\s+one table\.?$/i,
+      /^mezza$/i,
+      /^at the heart of the table$/i,
+      /^the menu$/i,
+      /^menu$/i,
+      /^plates$/i,
+      /^course[s]?$/i,
+      /^course\s+menu$/i,
+      /^this menu is not only about flavours\.?(?:\s+it is a story of culture)?$/i,
+      /^it is a story of culture$/i,
+    ];
+
+    const parsed = [];
+    candidateLines.forEach((line) => {
+      const sentenceFragments = String(line)
+        .split(/(?<=[.!?])\s+/)
+        .map((sentence) => sentence.trim())
+        .filter(Boolean);
+
+      sentenceFragments.forEach((sentence) => {
+        const cleanLine = String(sentence)
+          .replace(/^\s*[-•*]\s*/g, '')
+          .replace(/^[\-\*\d\.\)]\s*/g, '')
+          .replace(/\|[^|]+\|/g, '|')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        if (!cleanLine || ignoredLinePatterns.some((pattern) => pattern.test(cleanLine))) {
+          return;
+        }
+
+        let plate = cleanLine;
+        if (plate.includes('|')) {
+          const parts = plate.split('|').map((part) => part.trim()).filter(Boolean);
+          plate = parts.length > 1 ? parts[parts.length - 1] : parts[0];
+        }
+
+        plate = plate
+          .replace(/[.!?;:]+$/g, '')
+          .replace(/^[\-\*\d\.\)]\s*/g, '')
+          .replace(/^\s*[-•*]\s*/g, '')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        if (!plate || plate.length < 2 || !/[a-z]/i.test(plate)) {
+          return;
+        }
+
+        const normalized = plate.replace(/\s+/g, ' ');
+        if (!parsed.some((item) => item.toLowerCase() === normalized.toLowerCase())) {
+          parsed.push(normalized);
+        }
+      });
+    });
+
+    return parsed;
+  }
+
+  return [];
+}
+
 function allMenus() {
   return new Promise((resolve, reject) => {
     db.all('SELECT id, name, description, plates, plateCount FROM menus ORDER BY name ASC', (error, rows) => {
@@ -620,11 +720,7 @@ const server = http.createServer(async (req, res) => {
         allergies: String(item.allergies || '').trim(),
         address: String(item.address || '').trim(),
         eventTime: String(item.eventTime || '').trim(),
-        plates: Array.isArray(item.plates)
-          ? item.plates.map((plate) => String(plate || '').trim()).filter(Boolean)
-          : typeof item.plates === 'string'
-            ? item.plates.split(',').map((plate) => plate.trim()).filter(Boolean)
-            : [],
+        plates: cleanIncomingPlateNames(item.plates || []),
       }));
 
       const saved = await replaceRequests(normalized);

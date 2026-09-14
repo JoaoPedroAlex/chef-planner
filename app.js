@@ -191,9 +191,9 @@ async function loadMenus() {
 
     return parsed.map((item) => {
       const plates = Array.isArray(item.plates)
-        ? item.plates.map((plate) => normalizePlateLabel(plate)).filter(Boolean)
+        ? item.plates.map((plate) => normalizePlateObject(plate)).filter((plate) => plate.plateName)
         : typeof item.plates === 'string'
-          ? item.plates.split(',').map((plate) => plate.trim()).filter(Boolean)
+          ? platesToArray(item.plates).map((plateName) => ({ plateName, plateDescription: '' }))
           : [];
 
       return {
@@ -293,10 +293,12 @@ function platesToArray(value) {
       return [];
     }
 
-    const isMultilineImport = rawLines.length > 1;
-    const candidateLines = isMultilineImport
+    const candidateLines = rawLines.length > 1
       ? rawLines
-      : rawLines.flatMap((line) => line.includes(',') ? line.split(',') : [line]);
+      : rawText
+        .split(/(?<=[.!?])\s+|\s*[,;|]\s*/)
+        .map((line) => line.trim())
+        .filter(Boolean);
 
     const parsed = [];
     const ignoredLinePatterns = [
@@ -308,40 +310,50 @@ function platesToArray(value) {
       /^plates$/i,
       /^course[s]?$/i,
       /^course\s+menu$/i,
+      /^this menu is not only about flavours\.?(?:\s+it is a story of culture)?$/i,
+      /^it is a story of culture$/i,
     ];
 
     candidateLines.forEach((line) => {
-      const cleanLine = String(line)
-        .replace(/^\s*[-•*]\s*/g, '')
-        .replace(/^[\-\*\d\.\)]\s*/g, '')
-        .replace(/\|[^|]+\|/g, '|')
-        .replace(/\s+/g, ' ')
-        .trim();
+      const sentenceFragments = String(line)
+        .split(/(?<=[.!?])\s+/)
+        .map((sentence) => sentence.trim())
+        .filter(Boolean);
 
-      if (!cleanLine || ignoredLinePatterns.some((pattern) => pattern.test(cleanLine))) {
-        return;
-      }
+      sentenceFragments.forEach((sentence) => {
+        const cleanLine = String(sentence)
+          .replace(/^\s*[-•*]\s*/g, '')
+          .replace(/^[\-\*\d\.\)]\s*/g, '')
+          .replace(/\|[^|]+\|/g, '|')
+          .replace(/\s+/g, ' ')
+          .trim();
 
-      let plate = cleanLine;
-      if (plate.includes('|')) {
-        const parts = plate.split('|').map((part) => part.trim()).filter(Boolean);
-        plate = parts.length > 1 ? parts[parts.length - 1] : parts[0];
-      }
+        if (!cleanLine || ignoredLinePatterns.some((pattern) => pattern.test(cleanLine))) {
+          return;
+        }
 
-      plate = plate
-        .replace(/^[\-\*\d\.\)]\s*/g, '')
-        .replace(/^\s*[-•*]\s*/g, '')
-        .replace(/\s+/g, ' ')
-        .trim();
+        let plate = cleanLine;
+        if (plate.includes('|')) {
+          const parts = plate.split('|').map((part) => part.trim()).filter(Boolean);
+          plate = parts.length > 1 ? parts[parts.length - 1] : parts[0];
+        }
 
-      if (!plate || plate.length < 2 || !/[a-z]/i.test(plate)) {
-        return;
-      }
+        plate = plate
+          .replace(/[.!?;:]+$/g, '')
+          .replace(/^[\-\*\d\.\)]\s*/g, '')
+          .replace(/^\s*[-•*]\s*/g, '')
+          .replace(/\s+/g, ' ')
+          .trim();
 
-      const normalized = plate.replace(/\s+/g, ' ');
-      if (!parsed.some((item) => item.toLowerCase() === normalized.toLowerCase())) {
-        parsed.push(normalized);
-      }
+        if (!plate || plate.length < 2 || !/[a-z]/i.test(plate)) {
+          return;
+        }
+
+        const normalized = plate.replace(/\s+/g, ' ');
+        if (!parsed.some((item) => item.toLowerCase() === normalized.toLowerCase())) {
+          parsed.push(normalized);
+        }
+      });
     });
 
     return parsed;
@@ -352,7 +364,13 @@ function platesToArray(value) {
 
 function getDefaultPlatesForStyle(style) {
   const menu = getStoredMenus().find((item) => item.name === style);
-  return menu ? [...menu.plates] : [];
+  if (!menu || !Array.isArray(menu.plates)) {
+    return [];
+  }
+
+  return menu.plates
+    .map((plate) => normalizePlateLabel(plate))
+    .filter(Boolean);
 }
 
 function buildGoogleCalendarUrl(request) {
@@ -924,24 +942,35 @@ if (saveMenuLibraryButton) {
     const existingId = menuLibraryEditor?.dataset?.editingMenuId;
     const name = menuNameInput.value.trim();
     const description = menuDescriptionInput?.value.trim() || '';
-    const plateName = menuPlateNameInput?.value.trim() || '';
+    const plateNameInput = menuPlateNameInput?.value.trim() || '';
     const plateDescription = menuPlateDescriptionInput?.value.trim() || '';
     const plateCount = Number(menuPlateCountInput?.value || 0);
 
-    if (!name || !plateName || plateCount < 0) {
+    if (!name || !plateNameInput || plateCount < 0) {
       return;
     }
 
-    const plates = [{ plateName, plateDescription }];
+    const parsedPlateNames = platesToArray(plateNameInput);
+    const plates = parsedPlateNames.length
+      ? parsedPlateNames.map((plate, idx) => ({
+          plateName: String(plate || '').trim(),
+          plateDescription: idx === 0 ? plateDescription : '',
+        }))
+      : [{ plateName: '', plateDescription: '' }];
+
+    const cleanPlates = plates.filter((plate) => plate.plateName);
+    if (!cleanPlates.length) {
+      return;
+    }
 
     const nextMenus = [...sourceMenus];
     if (existingId) {
       const idx = nextMenus.findIndex((menu) => menu.id === existingId);
       if (idx >= 0) {
-        nextMenus[idx] = { ...nextMenus[idx], name, description, plates, plateCount };
+        nextMenus[idx] = { ...nextMenus[idx], name, description, plates: cleanPlates, plateCount };
       }
     } else {
-      nextMenus.push({ id: 'menu-' + Date.now().toString(36), name, description, plates, plateCount });
+      nextMenus.push({ id: 'menu-' + Date.now().toString(36), name, description, plates: cleanPlates, plateCount });
     }
 
     menus = await saveMenus(nextMenus);
