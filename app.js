@@ -20,8 +20,14 @@ const saveMenuLibraryButton = document.getElementById('saveMenuLibraryButton');
 const cancelMenuEditButton = document.getElementById('cancelMenuEditButton');
 const resetRequestsButton = document.getElementById('resetRequestsButton');
 const addToGoogleCalendarInput = document.getElementById('addToGoogleCalendarInput');
+const menuDocumentInput = document.getElementById('menuDocumentInput');
+const menuDocumentStatus = document.getElementById('menuDocumentStatus');
+const removeMenuDocumentButton = document.getElementById('removeMenuDocumentButton');
 const storageKey = 'chefops.planner.requests';
 const menuStorageKey = 'chefops.planner.menus';
+const attachmentDatabaseName = 'chefops.planner.attachments';
+const attachmentStoreName = 'requestAttachments';
+const maxAttachmentSize = 20 * 1024 * 1024;
 
 let menus = [];
 
@@ -117,6 +123,116 @@ async function saveRequests(items) {
   const normalized = Array.isArray(items) ? items : [];
   localStorage.setItem(storageKey, JSON.stringify(normalized));
   return normalized;
+}
+
+function openAttachmentDatabase() {
+  return new Promise((resolve, reject) => {
+    if (!window.indexedDB) {
+      reject(new Error('File storage is not supported in this browser.'));
+      return;
+    }
+
+    const request = window.indexedDB.open(attachmentDatabaseName, 1);
+    request.onupgradeneeded = () => {
+      const database = request.result;
+      if (!database.objectStoreNames.contains(attachmentStoreName)) {
+        database.createObjectStore(attachmentStoreName, { keyPath: 'requestId' });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error('Unable to open file storage.'));
+  });
+}
+
+async function saveRequestAttachment(requestId, file) {
+  const database = await openAttachmentDatabase();
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(attachmentStoreName, 'readwrite');
+    transaction.objectStore(attachmentStoreName).put({
+      requestId,
+      file,
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      updatedAt: new Date().toISOString(),
+    });
+    transaction.oncomplete = () => {
+      database.close();
+      resolve();
+    };
+    transaction.onerror = () => {
+      database.close();
+      reject(transaction.error || new Error('Unable to save the menu document.'));
+    };
+  });
+}
+
+async function getRequestAttachment(requestId) {
+  const database = await openAttachmentDatabase();
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(attachmentStoreName, 'readonly');
+    const request = transaction.objectStore(attachmentStoreName).get(requestId);
+    request.onsuccess = () => resolve(request.result || null);
+    request.onerror = () => reject(request.error || new Error('Unable to read the menu document.'));
+    transaction.oncomplete = () => database.close();
+  });
+}
+
+async function deleteRequestAttachment(requestId) {
+  const database = await openAttachmentDatabase();
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(attachmentStoreName, 'readwrite');
+    transaction.objectStore(attachmentStoreName).delete(requestId);
+    transaction.oncomplete = () => {
+      database.close();
+      resolve();
+    };
+    transaction.onerror = () => {
+      database.close();
+      reject(transaction.error || new Error('Unable to delete the menu document.'));
+    };
+  });
+}
+
+async function clearRequestAttachments() {
+  const database = await openAttachmentDatabase();
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(attachmentStoreName, 'readwrite');
+    transaction.objectStore(attachmentStoreName).clear();
+    transaction.oncomplete = () => {
+      database.close();
+      resolve();
+    };
+    transaction.onerror = () => {
+      database.close();
+      reject(transaction.error || new Error('Unable to clear menu documents.'));
+    };
+  });
+}
+
+function isSupportedMenuDocument(file) {
+  const supportedDocumentTypes = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ];
+  return file.type.startsWith('image/')
+    || supportedDocumentTypes.includes(file.type)
+    || /\.(pdf|doc|docx)$/i.test(file.name);
+}
+
+function formatFileSize(size) {
+  if (size < 1024 * 1024) return `${Math.max(1, Math.round(size / 1024))} KB`;
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function resetMenuDocumentUi() {
+  if (menuDocumentInput) {
+    menuDocumentInput.value = '';
+    delete menuDocumentInput.dataset.removeExistingAttachment;
+  }
+  if (menuDocumentStatus) menuDocumentStatus.textContent = 'No menu document attached';
+  if (removeMenuDocumentButton) removeMenuDocumentButton.classList.add('hidden');
 }
 
 function calculateProfit(price, grocery) {
@@ -365,6 +481,7 @@ function buildGoogleCalendarUrl(request) {
     `Menu: ${request.style || 'Custom menu'}`,
     `Guests: ${request.guests || 0}`,
     plateNames.length ? `Plates: ${plateNames.join(', ')}` : '',
+    request.attachment?.name ? `Menu document in ChefOps: ${request.attachment.name}` : '',
     `Price: $${request.price || 0}`,
     `Grocery: $${request.grocery || 0}`,
     request.allergies ? `Allergies: ${request.allergies}` : '',
@@ -762,6 +879,19 @@ function fillFormForEdit(requestId) {
   document.getElementById('eventTimeInput').value = request.eventTime || '19:00';
   document.getElementById('requestPlatesInput').value = platesToArray(request.plates || getDefaultPlatesForStyle(request.style)).join(', ');
 
+  if (menuDocumentInput) {
+    menuDocumentInput.value = '';
+    delete menuDocumentInput.dataset.removeExistingAttachment;
+  }
+  if (request.attachment && menuDocumentStatus) {
+    menuDocumentStatus.textContent = `Attached: ${request.attachment.name} (${formatFileSize(request.attachment.size || 0)})`;
+  } else if (menuDocumentStatus) {
+    menuDocumentStatus.textContent = 'No menu document attached';
+  }
+  if (removeMenuDocumentButton) {
+    removeMenuDocumentButton.classList.toggle('hidden', !request.attachment);
+  }
+
   menuForm.dataset.editingRequestId = request.id;
   if (submitButton) submitButton.textContent = 'Update Request';
   if (cancelEditButton) cancelEditButton.classList.remove('hidden');
@@ -775,6 +905,7 @@ function clearEditMode() {
   delete menuForm.dataset.editingRequestId;
   if (submitButton) submitButton.textContent = 'Save Request';
   if (cancelEditButton) cancelEditButton.classList.add('hidden');
+  resetMenuDocumentUi();
 }
 
 const backupDateStorageKey = 'chefops.lastBackupDate';
