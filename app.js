@@ -655,10 +655,20 @@ function updateSummary(items) {
   const profitBig = document.getElementById('profitBig');
   const todayDate = document.getElementById('todayDate');
   const todayEventsText = document.getElementById('todayEventsText');
+  const weeklyEventsText = document.getElementById('weeklyEventsText');
 
   const now = new Date();
   const todayKey = formatLocalDateKey(now);
   const todayEventCount = items.filter((item) => item.date === todayKey).length;
+  const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
+  const nextWeekStart = new Date(weekStart);
+  nextWeekStart.setDate(nextWeekStart.getDate() + 7);
+  const weekStartKey = formatLocalDateKey(weekStart);
+  const nextWeekStartKey = formatLocalDateKey(nextWeekStart);
+  const weeklyEventCount = items.filter((item) => (
+    item.date >= weekStartKey && item.date < nextWeekStartKey
+  )).length;
 
   if (requestCount) requestCount.textContent = String(items.length);
   if (eventsCount) eventsCount.textContent = String(items.length).padStart(2, '0');
@@ -675,6 +685,10 @@ function updateSummary(items) {
   if (todayEventsText) {
     const eventLabel = todayEventCount === 1 ? 'event' : 'events';
     todayEventsText.textContent = `${todayEventCount} ${eventLabel} scheduled`;
+  }
+  if (weeklyEventsText) {
+    weeklyEventsText.textContent = `${weeklyEventCount} this week`;
+    weeklyEventsText.classList.toggle('positive', weeklyEventCount > 0);
   }
 }
 

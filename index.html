@@ -83,9 +83,9 @@
             <span class="summary-label">Scheduled Events</span>
             <span class="summary-icon calendar-icon">◫</span>
           </div>
-          <div class="summary-number" id="eventsCount">08</div>
+          <div class="summary-number" id="eventsCount">00</div>
           <div class="summary-meta">
-            <span class="trend positive">+2 this week</span>
+            <span class="trend" id="weeklyEventsText">0 this week</span>
           </div>
         </article>
 
@@ -402,7 +402,7 @@
     </main>
   </div>
 
-  <script src="app.js?v=20261004-1"></script>
+  <script src="app.js?v=20261004-2"></script>
   <script>
     (() => {
       let calendarViewDate = null;
