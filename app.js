@@ -236,6 +236,16 @@ function normalizePlateObject(plate) {
   return { plateName: '', plateDescription: '' };
 }
 
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+  })[character]);
+}
+
 function platesToArray(value) {
   if (Array.isArray(value)) {
     return value.map((item) => normalizePlateLabel(item)).filter(Boolean);
@@ -465,14 +475,17 @@ function renderMenuLibrary() {
   }
 
   menuLibrary.innerHTML = menus.map((menu) => {
-    const plateNames = Array.isArray(menu.plates)
-      ? menu.plates.map((plate) => normalizePlateLabel(plate))
+    const normalizedPlates = Array.isArray(menu.plates)
+      ? menu.plates.map((plate) => normalizePlateObject(plate)).filter((plate) => plate.plateName)
       : [];
+    const plateNames = normalizedPlates.map((plate) => plate.plateName);
     const plateCount = Number(menu.plateCount || plateNames.length || 0);
+    const displayPanelId = `menu-display-${menu.id}`;
     return `<article class="menu-library-item" data-menu-id="${menu.id}">
       <div class="menu-library-top">
-        <span class="menu-library-name">${menu.name}</span>
+        <span class="menu-library-name">${escapeHtml(menu.name)}</span>
         <span class="menu-library-actions">
+          <button class="row-action-button row-details-button" type="button" data-menu-action="display" data-menu-id="${menu.id}" aria-expanded="false" aria-controls="${displayPanelId}">Display</button>
           <button class="row-action-button row-edit-button" data-menu-action="edit" data-menu-id="${menu.id}">Edit</button>
           <button class="row-action-button row-delete-button" data-menu-action="delete" data-menu-id="${menu.id}">Delete</button>
         </span>
@@ -481,7 +494,17 @@ function renderMenuLibrary() {
         <span class="menu-library-count">${plateCount} plates</span>
       </div>
       <div class="menu-library-plates">
-        ${plateNames.map((plate) => `<span class="menu-plate-chip">${plate}</span>`).join('')}
+        ${plateNames.map((plate) => `<span class="menu-plate-chip">${escapeHtml(plate)}</span>`).join('')}
+      </div>
+      <div class="menu-display-panel hidden" id="${displayPanelId}" data-menu-display="${menu.id}">
+        <p class="menu-display-description">${menu.description ? escapeHtml(menu.description) : 'No menu description.'}</p>
+        <div class="menu-display-plates">
+          ${normalizedPlates.map((plate, index) => `<article class="menu-display-plate">
+            <span class="menu-display-plate-number">Plate ${index + 1}</span>
+            <h4>${escapeHtml(plate.plateName)}</h4>
+            ${plate.plateDescription ? `<p>${escapeHtml(plate.plateDescription)}</p>` : ''}
+          </article>`).join('')}
+        </div>
       </div>
     </article>`;
   }).join('');
@@ -1100,6 +1123,28 @@ if (menuLibrary) {
     const menuId = actionButton.dataset.menuId;
     const action = actionButton.dataset.menuAction;
     const sourceMenus = getStoredMenus();
+
+    if (action === 'display') {
+      const targetCard = actionButton.closest('.menu-library-item');
+      const targetPanel = targetCard?.querySelector('[data-menu-display]');
+      if (!targetPanel) {
+        return;
+      }
+
+      const shouldOpen = targetPanel.classList.contains('hidden');
+      menuLibrary.querySelectorAll('[data-menu-display]').forEach((panel) => panel.classList.add('hidden'));
+      menuLibrary.querySelectorAll('[data-menu-action="display"]').forEach((button) => {
+        button.textContent = 'Display';
+        button.setAttribute('aria-expanded', 'false');
+      });
+
+      if (shouldOpen) {
+        targetPanel.classList.remove('hidden');
+        actionButton.textContent = 'Hide';
+        actionButton.setAttribute('aria-expanded', 'true');
+      }
+      return;
+    }
 
     if (action === 'delete') {
       const nextMenus = sourceMenus.filter((menu) => menu.id !== menuId);

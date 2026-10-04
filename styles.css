@@ -788,8 +788,9 @@ select {
 
 .menu-library-top {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
 }
 
@@ -802,7 +803,9 @@ select {
 
 .menu-library-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
 }
 
@@ -823,6 +826,54 @@ select {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 12px;
+}
+
+.menu-display-panel {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.menu-display-description {
+  margin: 0;
+  color: var(--text-soft);
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.menu-display-plates {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.menu-display-plate {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--white);
+}
+
+.menu-display-plate-number {
+  color: var(--text-soft);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.menu-display-plate h4 {
+  margin: 5px 0 0;
+  color: var(--sage-forest);
+  font-family: Georgia, serif;
+  font-size: 1rem;
+}
+
+.menu-display-plate p {
+  margin: 7px 0 0;
+  color: var(--text-soft);
+  line-height: 1.5;
+  white-space: pre-line;
 }
 
 .menu-plate-chip {
