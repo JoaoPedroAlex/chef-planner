@@ -47,10 +47,10 @@
 
       <div class="sidebar-card">
         <span class="mini-label">Today</span>
-        <div class="today-date" id="todayDate">Sunday, Sep 14</div>
+        <div class="today-date" id="todayDate">—</div>
         <div class="today-events">
           <span class="event-dot"></span>
-          <span>3 events scheduled</span>
+          <span id="todayEventsText">0 events scheduled</span>
         </div>
       </div>
 
@@ -415,8 +415,7 @@
         const calendarItems = Array.isArray(items) ? items : [];
 
         if (!calendarViewDate) {
-          const source = calendarItems.length ? calendarItems : samples;
-          const baseDate = source[0]?.date || new Date().toISOString().slice(0, 10);
+          const baseDate = calendarItems[0]?.date || formatLocalDateKey(new Date());
           const initialDate = new Date(baseDate + 'T00:00:00');
           calendarViewDate = Number.isNaN(initialDate.getTime())
             ? new Date()

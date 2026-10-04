@@ -138,6 +138,13 @@ function formatMenuDate(dateValue) {
   });
 }
 
+function formatLocalDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 async function loadMenus() {
   const savedMenus = localStorage.getItem(menuStorageKey);
 
@@ -538,8 +545,7 @@ function renderCalendar(items) {
     return;
   }
 
-  const source = items.length ? items : samples;
-  const baseDate = source[0]?.date || '2026-09-01';
+  const baseDate = items[0]?.date || formatLocalDateKey(new Date());
   const firstSelectedDate = new Date(baseDate + 'T00:00:00');
   const year = firstSelectedDate.getFullYear();
   const month = firstSelectedDate.getMonth();
@@ -647,12 +653,29 @@ function updateSummary(items) {
   const groceryCost = document.getElementById('groceryCost');
   const profitTotal = document.getElementById('profitTotal');
   const profitBig = document.getElementById('profitBig');
+  const todayDate = document.getElementById('todayDate');
+  const todayEventsText = document.getElementById('todayEventsText');
+
+  const now = new Date();
+  const todayKey = formatLocalDateKey(now);
+  const todayEventCount = items.filter((item) => item.date === todayKey).length;
 
   if (requestCount) requestCount.textContent = String(items.length);
   if (eventsCount) eventsCount.textContent = String(items.length).padStart(2, '0');
   if (groceryCost) groceryCost.textContent = '$' + totalCost.toFixed(2);
   if (profitTotal) profitTotal.textContent = '$' + totalProfit.toLocaleString();
   if (profitBig) profitBig.textContent = '$' + totalProfit.toLocaleString();
+  if (todayDate) {
+    todayDate.textContent = now.toLocaleDateString(undefined, {
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric',
+    });
+  }
+  if (todayEventsText) {
+    const eventLabel = todayEventCount === 1 ? 'event' : 'events';
+    todayEventsText.textContent = `${todayEventCount} ${eventLabel} scheduled`;
+  }
 }
 
 function fillFormForEdit(requestId) {
