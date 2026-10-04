@@ -1,7 +1,7 @@
 {
   "name": "ChefOps Planner",
   "short_name": "ChefOps",
-  "start_url": "/chef-planner",
+  "start_url": "/chef-planner/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#20391f",
