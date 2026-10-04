@@ -328,6 +328,7 @@ h2 {
 
 .topbar-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 14px;
 }
@@ -360,6 +361,11 @@ h2 {
   background: transparent;
   border: 1px solid var(--line);
   color: var(--sage-forest);
+}
+
+.danger-ghost-button {
+  border-color: var(--sage-red);
+  color: var(--sage-red);
 }
 
 .small-button {

@@ -18,6 +18,7 @@ const addPlateRowButton = document.getElementById('addPlateRowButton');
 const menuPlatePreview = document.getElementById('menuPlatePreview');
 const saveMenuLibraryButton = document.getElementById('saveMenuLibraryButton');
 const cancelMenuEditButton = document.getElementById('cancelMenuEditButton');
+const resetRequestsButton = document.getElementById('resetRequestsButton');
 const storageKey = 'chefops.planner.requests';
 const menuStorageKey = 'chefops.planner.menus';
 
@@ -82,8 +83,8 @@ async function loadRequests() {
   const savedRequests = localStorage.getItem(storageKey);
 
   if (!savedRequests) {
-    localStorage.setItem(storageKey, JSON.stringify(samples));
-    return [...samples];
+    localStorage.setItem(storageKey, '[]');
+    return [];
   }
 
   try {
@@ -105,9 +106,9 @@ async function loadRequests() {
       plates: Array.isArray(item.plates) ? item.plates : platesToArray(item.plates || ''),
     }));
   } catch (error) {
-    console.warn('Unable to read requests from localStorage. Using sample requests.', error);
-    localStorage.setItem(storageKey, JSON.stringify(samples));
-    return [...samples];
+    console.warn('Unable to read requests from localStorage. Starting with an empty planner.', error);
+    localStorage.setItem(storageKey, '[]');
+    return [];
   }
 }
 
@@ -1063,6 +1064,32 @@ navLinks.forEach((link) => {
     navLinks.forEach((item) => item.classList.toggle('active', item === link));
   });
 });
+
+if (resetRequestsButton) {
+  resetRequestsButton.addEventListener('click', async () => {
+    if (!requests.length) {
+      window.alert('The planner is already empty.');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'Delete all scheduled requests from this device? This resets events, grocery costs, and profit to zero. Saved menus will be kept.'
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    requests = [];
+    await saveRequests(requests);
+    renderMenus(requests);
+    renderTimeline(requests);
+    renderCalendar(requests);
+    updateSummary(requests);
+    updateChefWorkflow(requests);
+    clearEditMode();
+    menuForm?.reset();
+  });
+}
 
 if (menuList) {
   menuList.addEventListener('click', async (event) => {
