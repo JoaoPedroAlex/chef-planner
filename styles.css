@@ -730,6 +730,16 @@ select {
   border-radius: 12px;
 }
 
+.menu-plate-editor-row input,
+.menu-plate-editor-row textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.menu-plate-editor-row textarea {
+  min-height: 160px;
+}
+
 .menu-library-editor .full-width {
   display: flex;
   flex-direction: column;
