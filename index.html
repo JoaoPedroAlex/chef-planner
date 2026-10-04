@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ChefOps Planner</title>
-  <link rel="stylesheet" href="styles.css?v=20261004-3" />
+  <link rel="stylesheet" href="styles.css?v=20261004-4" />
   <link rel="manifest" href="manifest.json" />
 </head>
 <body>
@@ -252,6 +252,16 @@
                   <span class="field-label">Requested Plates</span>
                   <textarea id="requestPlatesInput" rows="4" placeholder="Plate 1, Plate 2, Plate 3"></textarea>
                 </label>
+                <div class="menu-document-field full-width">
+                  <span class="field-label">Menu Document</span>
+                  <div class="menu-document-controls">
+                    <label class="ghost-button small-button attachment-picker-button" for="menuDocumentInput">Attach Document</label>
+                    <input type="file" id="menuDocumentInput" class="hidden" accept="image/*,.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                    <button type="button" class="row-action-button row-delete-button hidden" id="removeMenuDocumentButton">Remove</button>
+                  </div>
+                  <span class="menu-document-status" id="menuDocumentStatus">No menu document attached</span>
+                  <span class="menu-document-help">Picture, PDF, DOC or DOCX · maximum 20 MB</span>
+                </div>
                 <label class="calendar-sync-option full-width">
                   <input type="checkbox" id="addToGoogleCalendarInput" checked />
                   <span>Add new request to Google Calendar after saving</span>
@@ -407,7 +417,7 @@
     </main>
   </div>
 
-  <script src="app.js?v=20261004-7"></script>
+  <script src="app.js?v=20261004-8"></script>
   <script>
     (() => {
       let calendarViewDate = null;

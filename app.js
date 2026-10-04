@@ -1123,6 +1123,34 @@ if (addMenuLibraryButton) {
   });
 }
 
+async function openRequestAttachment(requestId) {
+  try {
+    const attachment = await getRequestAttachment(requestId);
+    if (!attachment?.file) {
+      window.alert('This menu document is not available on this device. Attach it again by editing the request.');
+      return;
+    }
+
+    const fileUrl = URL.createObjectURL(attachment.file);
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.rel = 'noopener noreferrer';
+    const canPreview = attachment.type === 'application/pdf' || attachment.type?.startsWith('image/');
+    if (canPreview) {
+      link.target = '_blank';
+    } else {
+      link.download = attachment.name || 'menu-document';
+    }
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(fileUrl), 60000);
+  } catch (error) {
+    console.error('Unable to open menu document.', error);
+    window.alert('Unable to open the attached menu document on this device.');
+  }
+}
+
 function showRequestDetails(requestId) {
   const request = requests.find((item) => item.id === requestId);
   if (!request || !menuList) {
@@ -1164,6 +1192,12 @@ function showRequestDetails(requestId) {
         <span class="request-detail-label">Plates</span>
         <span class="request-detail-value plates-detail">${plates.map((plate) => `<span class="menu-plate-chip">${plate}</span>`).join('')}</span>
       </div>
+      ${request.attachment ? `<div class="request-detail-wide">
+        <span class="request-detail-label">Menu Document</span>
+        <button type="button" class="attachment-open-button" data-open-request-attachment>
+          ${escapeHtml(request.attachment.name)} · ${formatFileSize(request.attachment.size || 0)}
+        </button>
+      </div>` : ''}
       <div class="request-detail-wide">
         <a class="google-calendar-link" href="${googleCalendarUrl}" target="_blank" rel="noopener noreferrer">
           <span class="calendar-link-icon">+ Google Calendar</span>
@@ -1179,6 +1213,10 @@ function showRequestDetails(requestId) {
       detailsCard.classList.add('hidden');
     });
   }
+
+  detailsCard.querySelector('[data-open-request-attachment]')?.addEventListener('click', () => {
+    openRequestAttachment(requestId);
+  });
 
   detailsCard.classList.remove('hidden');
 }
@@ -1217,6 +1255,11 @@ if (resetRequestsButton) {
 
     requests = [];
     await saveRequests(requests);
+    try {
+      await clearRequestAttachments();
+    } catch (error) {
+      console.warn('Requests were reset, but attached files could not be cleared.', error);
+    }
     renderMenus(requests);
     renderTimeline(requests);
     renderCalendar(requests);
@@ -1245,6 +1288,11 @@ if (menuList) {
     if (action === 'delete') {
       requests = requests.filter((item) => item.id !== requestId);
       await saveRequests(requests);
+      try {
+        await deleteRequestAttachment(requestId);
+      } catch (error) {
+        console.warn('Request deleted, but its attached file could not be cleared.', error);
+      }
       renderMenus(requests);
       renderTimeline(requests);
       renderCalendar(requests);
@@ -1393,6 +1441,53 @@ if (cancelMenuEditButton) {
   });
 }
 
+if (menuDocumentInput) {
+  menuDocumentInput.addEventListener('change', () => {
+    const file = menuDocumentInput.files?.[0];
+    if (!file) return;
+
+    if (!isSupportedMenuDocument(file)) {
+      window.alert('Choose a picture, PDF, DOC, or DOCX file.');
+      menuDocumentInput.value = '';
+      return;
+    }
+    if (file.size > maxAttachmentSize) {
+      window.alert('The menu document must be 20 MB or smaller.');
+      menuDocumentInput.value = '';
+      return;
+    }
+
+    delete menuDocumentInput.dataset.removeExistingAttachment;
+    if (menuDocumentStatus) {
+      menuDocumentStatus.textContent = `Selected: ${file.name} (${formatFileSize(file.size)})`;
+    }
+    removeMenuDocumentButton?.classList.remove('hidden');
+  });
+}
+
+if (removeMenuDocumentButton) {
+  removeMenuDocumentButton.addEventListener('click', () => {
+    const editingRequest = requests.find((item) => item.id === menuForm?.dataset?.editingRequestId);
+
+    if (menuDocumentInput?.files?.length) {
+      menuDocumentInput.value = '';
+      if (editingRequest?.attachment) {
+        if (menuDocumentStatus) {
+          menuDocumentStatus.textContent = `Attached: ${editingRequest.attachment.name} (${formatFileSize(editingRequest.attachment.size || 0)})`;
+        }
+        return;
+      }
+    } else if (editingRequest?.attachment && menuDocumentInput) {
+      menuDocumentInput.dataset.removeExistingAttachment = 'true';
+      if (menuDocumentStatus) menuDocumentStatus.textContent = 'Menu document will be removed when the request is updated';
+    } else if (menuDocumentStatus) {
+      menuDocumentStatus.textContent = 'No menu document attached';
+    }
+
+    removeMenuDocumentButton.classList.add('hidden');
+  });
+}
+
 if (menuForm) {
   menuForm.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -1413,11 +1508,19 @@ if (menuForm) {
     }
 
     const existingRequestId = menuForm.dataset.editingRequestId;
+    const existingRequest = requests.find((item) => item.id === existingRequestId);
+    const selectedAttachment = menuDocumentInput?.files?.[0] || null;
+    const removeExistingAttachment = menuDocumentInput?.dataset.removeExistingAttachment === 'true';
+    const attachment = selectedAttachment
+      ? { name: selectedAttachment.name, type: selectedAttachment.type, size: selectedAttachment.size }
+      : removeExistingAttachment
+        ? null
+        : existingRequest?.attachment || null;
     let savedRequest;
 
     if (existingRequestId) {
       requests = requests.map((item) => item.id === existingRequestId
-        ? { ...item, client, style, guests, date, price, grocery, allergies, address, eventTime, plates }
+        ? { ...item, client, style, guests, date, price, grocery, allergies, address, eventTime, plates, attachment }
         : item
       );
       savedRequest = requests.find((item) => item.id === existingRequestId);
@@ -1434,6 +1537,7 @@ if (menuForm) {
         address,
         eventTime,
         plates,
+        attachment,
       };
 
       requests = [...requests, nextItem];
@@ -1455,6 +1559,21 @@ if (menuForm) {
     }
 
     await saveOperation;
+
+    try {
+      if (selectedAttachment && savedRequest) {
+        await saveRequestAttachment(savedRequest.id, selectedAttachment);
+      } else if (removeExistingAttachment && savedRequest) {
+        await deleteRequestAttachment(savedRequest.id);
+      }
+    } catch (error) {
+      console.error('Unable to save the menu document.', error);
+      if (selectedAttachment && savedRequest) {
+        requests = requests.map((item) => item.id === savedRequest.id ? { ...item, attachment: null } : item);
+        await saveRequests(requests);
+      }
+      window.alert('The request was saved, but the menu document could not be stored on this device.');
+    }
 
     renderMenus(requests);
     renderTimeline(requests);

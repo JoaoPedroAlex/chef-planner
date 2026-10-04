@@ -706,6 +706,56 @@ select {
   flex: 0 0 auto;
 }
 
+.menu-document-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menu-document-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.attachment-picker-button {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.menu-document-status {
+  color: var(--sage-forest);
+  font-size: 0.8rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.menu-document-help {
+  color: var(--text-soft);
+  font-size: 0.72rem;
+}
+
+.attachment-open-button {
+  width: fit-content;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--white);
+  color: var(--sage-blue);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
 .form-actions .ghost-button {
   height: 38px;
 }
