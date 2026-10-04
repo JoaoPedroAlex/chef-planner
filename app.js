@@ -656,6 +656,8 @@ function updateSummary(items) {
   const todayDate = document.getElementById('todayDate');
   const todayEventsText = document.getElementById('todayEventsText');
   const weeklyEventsText = document.getElementById('weeklyEventsText');
+  const requestSummaryText = document.getElementById('requestSummaryText');
+  const profitSummaryText = document.getElementById('profitSummaryText');
 
   const now = new Date();
   const todayKey = formatLocalDateKey(now);
@@ -689,6 +691,28 @@ function updateSummary(items) {
   if (weeklyEventsText) {
     weeklyEventsText.textContent = `${weeklyEventCount} this week`;
     weeklyEventsText.classList.toggle('positive', weeklyEventCount > 0);
+  }
+  if (requestSummaryText) {
+    requestSummaryText.textContent = items.length === 0
+      ? 'No requests'
+      : `${items.length} saved ${items.length === 1 ? 'request' : 'requests'}`;
+    requestSummaryText.classList.toggle('positive', items.length > 0);
+  }
+  if (profitSummaryText) {
+    profitSummaryText.classList.remove('positive', 'warning');
+
+    if (totalRevenue === 0) {
+      profitSummaryText.textContent = 'No profit recorded';
+    } else {
+      const margin = totalProfit / totalRevenue;
+      const formattedMargin = new Intl.NumberFormat(undefined, {
+        style: 'percent',
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+      }).format(margin);
+      profitSummaryText.textContent = `${formattedMargin} margin`;
+      profitSummaryText.classList.add(totalProfit >= 0 ? 'positive' : 'warning');
+    }
   }
 }
 

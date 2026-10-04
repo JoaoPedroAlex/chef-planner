@@ -94,9 +94,9 @@
             <span class="summary-label">Menu Requests</span>
             <span class="summary-icon menu-icon">☰</span>
           </div>
-          <div class="summary-number" id="requestCount">12</div>
+          <div class="summary-number" id="requestCount">0</div>
           <div class="summary-meta">
-            <span class="trend positive">+4 new</span>
+            <span class="trend" id="requestSummaryText">No requests</span>
           </div>
         </article>
 
@@ -116,9 +116,9 @@
             <span class="summary-label">Net Profit</span>
             <span class="summary-icon profit-icon">Σ</span>
           </div>
-          <div class="summary-number" id="profitTotal">$2,440</div>
+          <div class="summary-number" id="profitTotal">$0</div>
           <div class="summary-meta">
-            <span class="trend positive">+18.2%</span>
+            <span class="trend" id="profitSummaryText">No profit recorded</span>
           </div>
         </article>
       </section>
@@ -402,7 +402,7 @@
     </main>
   </div>
 
-  <script src="app.js?v=20261004-2"></script>
+  <script src="app.js?v=20261004-4"></script>
   <script>
     (() => {
       let calendarViewDate = null;
