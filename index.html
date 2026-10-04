@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ChefOps Planner</title>
-  <link rel="stylesheet" href="styles.css?v=20261004-2" />
+  <link rel="stylesheet" href="styles.css?v=20261004-3" />
   <link rel="manifest" href="manifest.json" />
 </head>
 <body>
@@ -252,6 +252,10 @@
                   <span class="field-label">Requested Plates</span>
                   <textarea id="requestPlatesInput" rows="4" placeholder="Plate 1, Plate 2, Plate 3"></textarea>
                 </label>
+                <label class="calendar-sync-option full-width">
+                  <input type="checkbox" id="addToGoogleCalendarInput" checked />
+                  <span>Add new request to Google Calendar after saving</span>
+                </label>
               </div>
               <div class="form-actions">
                 <button type="button" class="ghost-button small-button hidden" id="cancelEditButton">Cancel Edit</button>
@@ -403,7 +407,7 @@
     </main>
   </div>
 
-  <script src="app.js?v=20261004-6"></script>
+  <script src="app.js?v=20261004-7"></script>
   <script>
     (() => {
       let calendarViewDate = null;

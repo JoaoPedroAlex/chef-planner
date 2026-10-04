@@ -19,6 +19,7 @@ const menuPlatePreview = document.getElementById('menuPlatePreview');
 const saveMenuLibraryButton = document.getElementById('saveMenuLibraryButton');
 const cancelMenuEditButton = document.getElementById('cancelMenuEditButton');
 const resetRequestsButton = document.getElementById('resetRequestsButton');
+const addToGoogleCalendarInput = document.getElementById('addToGoogleCalendarInput');
 const storageKey = 'chefops.planner.requests';
 const menuStorageKey = 'chefops.planner.menus';
 
@@ -353,6 +354,9 @@ function buildGoogleCalendarUrl(request) {
   const [hour, minute] = startTime.split(':').map(Number);
   const start = new Date(`${startDate}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`);
   const end = new Date(start.getTime() + 60 * 60 * 1000);
+  const plateNames = Array.isArray(request.plates)
+    ? request.plates.map((plate) => normalizePlateLabel(plate)).filter(Boolean)
+    : [];
 
   const eventName = `${request.client || 'Client'} · ${request.style || 'Menu Request'}`;
   const eventDescription = [
@@ -360,6 +364,7 @@ function buildGoogleCalendarUrl(request) {
     `Client: ${request.client || 'Unknown client'}`,
     `Menu: ${request.style || 'Custom menu'}`,
     `Guests: ${request.guests || 0}`,
+    plateNames.length ? `Plates: ${plateNames.join(', ')}` : '',
     `Price: $${request.price || 0}`,
     `Grocery: $${request.grocery || 0}`,
     request.allergies ? `Allergies: ${request.allergies}` : '',
@@ -370,7 +375,7 @@ function buildGoogleCalendarUrl(request) {
   googleUrl.searchParams.set('text', eventName);
   googleUrl.searchParams.set('details', eventDescription);
   googleUrl.searchParams.set('location', request.address || 'ChefOps event');
-  googleUrl.searchParams.set('dates', `${formatGoogleDate(start)} / ${formatGoogleDate(end)}`);
+  googleUrl.searchParams.set('dates', `${formatGoogleDate(start)}/${formatGoogleDate(end)}`);
 
   return googleUrl.toString();
 }
@@ -1277,12 +1282,14 @@ if (menuForm) {
     }
 
     const existingRequestId = menuForm.dataset.editingRequestId;
+    let savedRequest;
 
     if (existingRequestId) {
       requests = requests.map((item) => item.id === existingRequestId
         ? { ...item, client, style, guests, date, price, grocery, allergies, address, eventTime, plates }
         : item
       );
+      savedRequest = requests.find((item) => item.id === existingRequestId);
     } else {
       const nextItem = {
         id: generateRequestId(),
@@ -1299,9 +1306,24 @@ if (menuForm) {
       };
 
       requests = [...requests, nextItem];
+      savedRequest = nextItem;
     }
 
-    await saveRequests(requests);
+    const saveOperation = saveRequests(requests);
+    const shouldOpenGoogleCalendar = !existingRequestId && addToGoogleCalendarInput?.checked;
+    if (shouldOpenGoogleCalendar && savedRequest) {
+      const calendarWindow = window.open(
+        buildGoogleCalendarUrl(savedRequest),
+        '_blank'
+      );
+      if (calendarWindow) {
+        calendarWindow.opener = null;
+      } else {
+        window.alert('The request was saved, but the Google Calendar window was blocked. Open the request Details and tap Book in Google Calendar.');
+      }
+    }
+
+    await saveOperation;
 
     renderMenus(requests);
     renderTimeline(requests);

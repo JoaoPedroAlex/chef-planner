@@ -687,6 +687,25 @@ select {
   margin-top: 14px;
 }
 
+.calendar-sync-option {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  color: var(--sage-forest);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.calendar-sync-option input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--sage-green-dark);
+  flex: 0 0 auto;
+}
+
 .form-actions .ghost-button {
   height: 38px;
 }
