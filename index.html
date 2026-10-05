@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ChefOps Planner</title>
-  <link rel="stylesheet" href="styles.css?v=20261004-4" />
+  <link rel="stylesheet" href="styles.css?v=20261005-1" />
   <link rel="manifest" href="manifest.json" />
 </head>
 <body>
@@ -51,9 +51,9 @@
       </div>
 
       <div class="sidebar-footer">
-        <button class="primary-button small-button">
+        <button class="primary-button small-button" data-add-request-button>
           <span>+</span>
-          Create Menu
+          Create Request
         </button>
       </div>
     </aside>
@@ -88,7 +88,7 @@
 
         <article class="summary-card">
           <div class="summary-card-head">
-            <span class="summary-label">Menu Requests</span>
+            <span class="summary-label">Client Requests</span>
             <span class="summary-icon menu-icon">☰</span>
           </div>
           <div class="summary-number" id="requestCount">0</div>
@@ -102,7 +102,7 @@
             <span class="summary-label">Grocery Costs</span>
             <span class="summary-icon grocery-icon">✎</span>
           </div>
-          <div class="summary-number" id="groceryCost">$428.50</div>
+          <div class="summary-number" id="groceryCost">€0.00</div>
           <div class="summary-meta">
             <span class="trend warning">Forecast</span>
           </div>
@@ -113,7 +113,7 @@
             <span class="summary-label">Net Profit</span>
             <span class="summary-icon profit-icon">Σ</span>
           </div>
-          <div class="summary-number" id="profitTotal">$0</div>
+          <div class="summary-number" id="profitTotal">€0</div>
           <div class="summary-meta">
             <span class="trend" id="profitSummaryText">No profit recorded</span>
           </div>
@@ -166,7 +166,7 @@
               <span class="time">11:00</span>
               <span class="timeline-line"></span>
               <div class="timeline-content">
-                <span class="timeline-title">Menu planning</span>
+                <span class="timeline-title">Client follow-up</span>
                 <span class="timeline-detail">Client: Savory Table</span>
               </div>
             </div>
@@ -194,10 +194,10 @@
         <article class="panel planning-panel" id="clients">
           <div class="panel-header compact">
             <div>
-              <span class="panel-kicker">Menu Planning</span>
+              <span class="panel-kicker">Request Management</span>
               <h2>Client Requests</h2>
             </div>
-            <button class="primary-button small-button" id="addMenuButton">+ Add Menu</button>
+            <button class="primary-button small-button" id="addRequestButton">+ Add Request</button>
           </div>
 
           <div class="menu-form-wrap">
@@ -208,13 +208,8 @@
                   <input type="text" id="clientName" placeholder="Client name" required />
                 </label>
                 <label>
-                  <span class="field-label">Menu Style</span>
-                  <select id="menuStyle" required>
-                    <option>Seasonal Tasting</option>
-                    <option>Vegetarian Menu</option>
-                    <option>French Market</option>
-                    <option>Private Dining</option>
-                  </select>
+                  <span class="field-label">Event / Request</span>
+                  <input type="text" id="requestTitle" placeholder="e.g. Private dinner" required />
                 </label>
                 <label>
                   <span class="field-label">Guests</span>
@@ -225,7 +220,7 @@
                   <input type="date" id="eventDate" value="2026-09-14" required />
                 </label>
                 <label>
-                  <span class="field-label">Menu Price</span>
+                  <span class="field-label">Quoted Price</span>
                   <input type="number" id="menuPrice" min="1" value="420" required />
                 </label>
                 <label>
@@ -243,10 +238,6 @@
                 <label>
                   <span class="field-label">Event Time</span>
                   <input type="time" id="eventTimeInput" value="19:00" />
-                </label>
-                <label class="full-width">
-                  <span class="field-label">Requested Plates</span>
-                  <textarea id="requestPlatesInput" rows="4" placeholder="Plate 1, Plate 2, Plate 3"></textarea>
                 </label>
                 <div class="menu-document-field full-width">
                   <span class="field-label">Menu Document</span>
@@ -270,80 +261,8 @@
             </form>
           </div>
 
-          <div class="menu-library-wrap" id="menus">
-            <div class="menu-library-head">
-              <div>
-                <span class="panel-kicker">Menu Book</span>
-                <h3>Menus</h3>
-              </div>
-              <button class="primary-button small-button" id="addMenuLibraryButton">+ Add Menu</button>
-            </div>
-
-            <div class="menu-library-editor hidden" id="menuLibraryEditor">
-              <div class="form-grid">
-                <label class="full-width">
-                  <span class="field-label">Menu Name</span>
-                  <input type="text" id="menuNameInput" placeholder="e.g. French Market" required />
-                </label>
-                <label class="full-width">
-                  <span class="field-label">Menu Description</span>
-                  <textarea id="menuDescriptionInput" rows="2" placeholder="Short description for the menu"></textarea>
-                </label>
-                <div class="full-width">
-                  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;">
-                    <span class="field-label">Plates</span>
-                    <button type="button" class="ghost-button small-button" id="addPlateRowButton">+ Add Plate</button>
-                  </div>
-                  <div id="menuPlatesContainer"></div>
-                </div>
-              </div>
-              <div class="menu-plate-preview-wrap">
-                <span class="mini-label">Plate preview</span>
-                <div class="menu-plate-preview" id="menuPlatePreview"></div>
-              </div>
-              <div class="form-actions">
-                <button type="button" class="ghost-button small-button hidden" id="cancelMenuEditButton">Cancel</button>
-                <button type="button" class="primary-button small-button" id="saveMenuLibraryButton">Save Menu</button>
-              </div>
-            </div>
-
-            <div class="menu-library-list" id="menuLibrary"></div>
-          </div>
-
           <div class="menu-list" id="menuList">
-            <div class="menu-row">
-              <div class="menu-row-main">
-                <span class="menu-client">Savory Table</span>
-                <span class="menu-detail">French Market · 8 guests</span>
-              </div>
-              <div class="menu-row-meta">
-                <span class="menu-price">$420</span>
-                <span class="menu-cost">Cost $180</span>
-                <span class="menu-profit">Profit $240</span>
-              </div>
-            </div>
-            <div class="menu-row">
-              <div class="menu-row-main">
-                <span class="menu-client">The Green Room</span>
-                <span class="menu-detail">Vegetarian Menu · 12 guests</span>
-              </div>
-              <div class="menu-row-meta">
-                <span class="menu-price">$560</span>
-                <span class="menu-cost">Cost $260</span>
-                <span class="menu-profit">Profit $300</span>
-              </div>
-            </div>
-            <div class="menu-row">
-              <div class="menu-row-main">
-                <span class="menu-client">Luna Catering</span>
-                <span class="menu-detail">Seasonal Tasting · 20 guests</span>
-              </div>
-              <div class="menu-row-meta">
-                <span class="menu-price">$980</span>
-                <span class="menu-cost">Cost $490</span>
-                <span class="menu-profit">Profit $490</span>
-              </div>
-            </div>
+            <div class="empty-list">No requests yet</div>
           </div>
         </article>
 
@@ -359,7 +278,7 @@
           <div class="profit-summary">
             <div class="profit-total">
               <span class="profit-total-label">Net Profit</span>
-              <span class="profit-total-value" id="profitBig">$2,440</span>
+              <span class="profit-total-value" id="profitBig">€0</span>
             </div>
             <div class="profit-bars">
               <div class="bar-row">
@@ -367,14 +286,14 @@
                 <div class="bar-track">
                   <div class="bar-fill green-fill" style="width: 76%;"></div>
                 </div>
-                <span class="bar-value">$3,062</span>
+                <span class="bar-value">€0</span>
               </div>
               <div class="bar-row">
                 <span class="bar-label">Costs</span>
                 <div class="bar-track">
                   <div class="bar-fill orange-fill" style="width: 44%;"></div>
                 </div>
-                <span class="bar-value">$622</span>
+                <span class="bar-value">€0</span>
               </div>
             </div>
           </div>
@@ -413,7 +332,7 @@
     </main>
   </div>
 
-  <script src="app.js?v=20261004-8"></script>
+  <script src="app.js?v=20261005-1"></script>
   <script>
     (() => {
       let calendarViewDate = null;

@@ -5,82 +5,16 @@ const cancelEditButton = document.getElementById('cancelEditButton');
 const timeline = document.getElementById('timeline');
 const calendarGrid = document.getElementById('calendarGrid');
 const calendarMonthTitle = document.querySelector('.month-title');
-const menuStyle = document.getElementById('menuStyle');
-const requestPlatesInput = document.getElementById('requestPlatesInput');
-const addMenuButton = document.getElementById('addMenuButton');
-const addMenuLibraryButton = document.getElementById('addMenuLibraryButton');
-const menuLibrary = document.getElementById('menuLibrary');
-const menuLibraryEditor = document.getElementById('menuLibraryEditor');
-const menuNameInput = document.getElementById('menuNameInput');
-const menuDescriptionInput = document.getElementById('menuDescriptionInput');
-const menuPlatesContainer = document.getElementById('menuPlatesContainer');
-const addPlateRowButton = document.getElementById('addPlateRowButton');
-const menuPlatePreview = document.getElementById('menuPlatePreview');
-const saveMenuLibraryButton = document.getElementById('saveMenuLibraryButton');
-const cancelMenuEditButton = document.getElementById('cancelMenuEditButton');
+const addRequestButtons = document.querySelectorAll('#addRequestButton, [data-add-request-button]');
 const resetRequestsButton = document.getElementById('resetRequestsButton');
 const addToGoogleCalendarInput = document.getElementById('addToGoogleCalendarInput');
 const menuDocumentInput = document.getElementById('menuDocumentInput');
 const menuDocumentStatus = document.getElementById('menuDocumentStatus');
 const removeMenuDocumentButton = document.getElementById('removeMenuDocumentButton');
 const storageKey = 'chefops.planner.requests';
-const menuStorageKey = 'chefops.planner.menus';
 const attachmentDatabaseName = 'chefops.planner.attachments';
 const attachmentStoreName = 'requestAttachments';
 const maxAttachmentSize = 20 * 1024 * 1024;
-
-let menus = [];
-
-const samples = [
-  {
-    id: 'sample-1',
-    client: 'Savory Table',
-    style: 'French Market',
-    guests: 8,
-    price: 420,
-    grocery: 180,
-    date: '2026-09-14',
-    plates: ['Market starter', 'Bistro fish', 'Pear tart'],
-  },
-  {
-    id: 'sample-2',
-    client: 'The Green Room',
-    style: 'Vegetarian Menu',
-    guests: 12,
-    price: 560,
-    grocery: 260,
-    date: '2026-09-16',
-    plates: ['Root garden soup', 'Saffron squash', 'Herb tart'],
-  },
-  {
-    id: 'sample-3',
-    client: 'Luna Catering',
-    style: 'Seasonal Tasting',
-    guests: 20,
-    price: 980,
-    grocery: 490,
-    date: '2026-09-18',
-    plates: ['Garden salad', 'Seasonal main', 'Cedar pear'],
-  }
-];
-
-const defaultMenus = [
-  {
-    id: 'menu-1',
-    name: 'French Market',
-    plates: ['Market starter', 'Bistro fish', 'Pear tart'],
-  },
-  {
-    id: 'menu-2',
-    name: 'Vegetarian Menu',
-    plates: ['Root garden soup', 'Saffron squash', 'Herb tart'],
-  },
-  {
-    id: 'menu-3',
-    name: 'Seasonal Tasting',
-    plates: ['Garden salad', 'Seasonal main', 'Cedar pear'],
-  },
-];
 
 function generateRequestId() {
   return 'request-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
@@ -110,7 +44,6 @@ async function loadRequests() {
       allergies: item.allergies || '',
       address: item.address || '',
       eventTime: item.eventTime || '',
-      plates: Array.isArray(item.plates) ? item.plates : platesToArray(item.plates || ''),
     }));
   } catch (error) {
     console.warn('Unable to read requests from localStorage. Starting with an empty planner.', error);
@@ -263,97 +196,6 @@ function formatLocalDateKey(date) {
   return `${year}-${month}-${day}`;
 }
 
-async function loadMenus() {
-  const savedMenus = localStorage.getItem(menuStorageKey);
-
-  if (!savedMenus) {
-    localStorage.setItem(menuStorageKey, JSON.stringify(defaultMenus));
-    return [...defaultMenus];
-  }
-
-  try {
-    const parsed = JSON.parse(savedMenus);
-    if (!Array.isArray(parsed)) {
-      throw new Error('Saved menus are not an array.');
-    }
-
-    return parsed.map((item) => {
-      const plates = Array.isArray(item.plates)
-        ? item.plates.map((plate) => normalizePlateObject(plate)).filter((plate) => plate.plateName)
-        : typeof item.plates === 'string'
-          ? platesToArray(item.plates).map((plateName) => ({ plateName, plateDescription: '' }))
-          : [];
-
-      return {
-        ...item,
-        id: item.id || `menu-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`,
-        name: String(item.name || '').trim(),
-        description: String(item.description || '').trim(),
-        plates,
-        plateCount: Number(item.plateCount || plates.length || 0),
-      };
-    });
-  } catch (error) {
-    console.warn('Unable to read menus from localStorage. Using default menus.', error);
-    localStorage.setItem(menuStorageKey, JSON.stringify(defaultMenus));
-    return [...defaultMenus];
-  }
-}
-
-async function saveMenus(items) {
-  const normalized = (Array.isArray(items) ? items : []).map((item) => {
-    const plates = Array.isArray(item.plates)
-      ? item.plates.map((plate) => normalizePlateObject(plate)).filter((plate) => plate.plateName)
-      : typeof item.plates === 'string'
-        ? platesToArray(item.plates).map((plateName) => ({ plateName, plateDescription: '' }))
-        : [];
-
-    return {
-      ...item,
-      id: item.id || `menu-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`,
-      name: String(item.name || '').trim(),
-      description: String(item.description || '').trim(),
-      plates,
-      plateCount: Number(item.plateCount || plates.length || 0),
-    };
-  });
-
-  localStorage.setItem(menuStorageKey, JSON.stringify(normalized));
-  menus = normalized;
-  return normalized;
-}
-
-function getStoredMenus() {
-  return Array.isArray(menus) && menus.length ? [...menus] : [...defaultMenus];
-}
-
-function normalizePlateLabel(plate) {
-  if (typeof plate === 'string') {
-    return plate.trim();
-  }
-
-  if (plate && typeof plate === 'object') {
-    return String(plate.plateName || plate.name || plate.title || '').trim();
-  }
-
-  return '';
-}
-
-function normalizePlateObject(plate) {
-  if (typeof plate === 'string') {
-    return { plateName: plate.trim(), plateDescription: '' };
-  }
-
-  if (plate && typeof plate === 'object') {
-    return {
-      plateName: String(plate.plateName || plate.name || plate.title || '').trim(),
-      plateDescription: String(plate.plateDescription || plate.description || '').trim(),
-    };
-  }
-
-  return { plateName: '', plateDescription: '' };
-}
-
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (character) => ({
     '&': '&amp;',
@@ -364,123 +206,18 @@ function escapeHtml(value) {
   })[character]);
 }
 
-function platesToArray(value) {
-  if (Array.isArray(value)) {
-    return value.map((item) => normalizePlateLabel(item)).filter(Boolean);
-  }
-
-  if (typeof value === 'string') {
-    const rawText = String(value)
-      .replace(/\r/g, '\n')
-      .replace(/[•·]/g, '\n')
-      .replace(/[—–]/g, ' ');
-
-    const rawLines = rawText
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean);
-
-    if (!rawLines.length) {
-      return [];
-    }
-
-    const candidateLines = rawLines.length > 1
-      ? rawLines
-      : rawText
-        .split(/(?<=[.!?])\s+|\s*[,;|]\s*/)
-        .map((line) => line.trim())
-        .filter(Boolean);
-
-    const parsed = [];
-    const ignoredLinePatterns = [
-      /^four shores?\.?\s+one table\.?$/i,
-      /^mezza$/i,
-      /^at the heart of the table$/i,
-      /^the menu$/i,
-      /^menu$/i,
-      /^plates$/i,
-      /^course[s]?$/i,
-      /^course\s+menu$/i,
-      /^this menu is not only about flavours\.?(?:\s+it is a story of culture)?$/i,
-      /^it is a story of culture$/i,
-    ];
-
-    candidateLines.forEach((line) => {
-      const sentenceFragments = String(line)
-        .split(/(?<=[.!?])\s+/)
-        .map((sentence) => sentence.trim())
-        .filter(Boolean);
-
-      sentenceFragments.forEach((sentence) => {
-        const cleanLine = String(sentence)
-          .replace(/^\s*[-•*]\s*/g, '')
-          .replace(/^[\-\*\d\.\)]\s*/g, '')
-          .replace(/\|[^|]+\|/g, '|')
-          .replace(/\s+/g, ' ')
-          .trim();
-
-        if (!cleanLine || ignoredLinePatterns.some((pattern) => pattern.test(cleanLine))) {
-          return;
-        }
-
-        let plate = cleanLine;
-        if (plate.includes('|')) {
-          const parts = plate.split('|').map((part) => part.trim()).filter(Boolean);
-          plate = parts.length > 1 ? parts[parts.length - 1] : parts[0];
-        }
-
-        plate = plate
-          .replace(/[.!?;:]+$/g, '')
-          .replace(/^[\-\*\d\.\)]\s*/g, '')
-          .replace(/^\s*[-•*]\s*/g, '')
-          .replace(/\s+/g, ' ')
-          .trim();
-
-        if (!plate || plate.length < 2 || !/[a-z]/i.test(plate)) {
-          return;
-        }
-
-        const normalized = plate.replace(/\s+/g, ' ');
-        if (!parsed.some((item) => item.toLowerCase() === normalized.toLowerCase())) {
-          parsed.push(normalized);
-        }
-      });
-    });
-
-    return parsed;
-  }
-
-  return [];
-}
-
-function getDefaultPlatesForStyle(style) {
-  const menu = getStoredMenus().find((item) => item.name === style);
-  if (!menu || !Array.isArray(menu.plates)) {
-    return [];
-  }
-
-  return menu.plates
-    .map((plate) => normalizePlateLabel(plate))
-    .filter(Boolean);
-}
-
 function buildGoogleCalendarUrl(request) {
   const startDate = request.date || new Date().toISOString().slice(0, 10);
   const startTime = request.eventTime || '19:00';
   const [hour, minute] = startTime.split(':').map(Number);
   const start = new Date(`${startDate}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`);
   const end = new Date(start.getTime() + 60 * 60 * 1000);
-  const plateNames = Array.isArray(request.plates)
-    ? request.plates.map((plate) => normalizePlateLabel(plate)).filter(Boolean)
-    : [];
-
-  const eventName = `${request.client || 'Client'} · ${request.style || 'Menu Request'}`;
+  const eventName = `${request.client || 'Client'} · ${request.style || 'Client Request'}`;
   const eventDescription = [
     'ChefOps Planner request',
     `Client: ${request.client || 'Unknown client'}`,
-    `Menu: ${request.style || 'Custom menu'}`,
+    `Request: ${request.style || 'Private event'}`,
     `Guests: ${request.guests || 0}`,
-    plateNames.length ? `Plates: ${plateNames.join(', ')}` : '',
     request.attachment?.name ? `Menu document in ChefOps: ${request.attachment.name}` : '',
     `Price: €${request.price || 0}`,
     `Grocery: €${request.grocery || 0}`,
@@ -544,120 +281,6 @@ function renderMenus(items) {
       </div>
     </div>`;
   }).join('');
-}
-
-function createPlateRow(plate = {}) {
-  if (!menuPlatesContainer) return;
-  const normalized = normalizePlateObject(plate);
-  const row = document.createElement('div');
-  row.className = 'menu-plate-editor-row';
-  row.style.cssText = 'border:1px solid #dfd2b5;border-radius:12px;padding:14px;margin-bottom:12px;background:#fffdf8;';
-  row.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;"><span class="field-label plate-row-title">Plate</span><button type="button" class="row-action-button row-delete-button" data-remove-plate>Remove</button></div><label class="full-width" style="display:block;margin-bottom:10px;"><span class="field-label">Plate Name</span><input type="text" data-plate-name placeholder="e.g. Market starter"></label><label class="full-width" style="display:block;"><span class="field-label">Plate Description</span><textarea data-plate-description rows="3" placeholder="Short plate description"></textarea></label>`;
-  row.querySelector('[data-plate-name]').value = normalized.plateName;
-  row.querySelector('[data-plate-description]').value = normalized.plateDescription;
-  menuPlatesContainer.appendChild(row);
-  updatePlateRowsUi();
-  renderMenuPlatePreview();
-}
-function updatePlateRowsUi() {
-  if (!menuPlatesContainer) return;
-  const rows = Array.from(menuPlatesContainer.querySelectorAll('.menu-plate-editor-row'));
-  rows.forEach((row, index) => {
-    row.querySelector('.plate-row-title').textContent = `Plate ${index + 1}`;
-    row.querySelector('[data-remove-plate]').disabled = rows.length === 1;
-  });
-}
-function getPlateRowsData() {
-  if (!menuPlatesContainer) return [];
-  return Array.from(menuPlatesContainer.querySelectorAll('.menu-plate-editor-row')).map((row) => ({
-    plateName: String(row.querySelector('[data-plate-name]')?.value || '').trim(),
-    plateDescription: String(row.querySelector('[data-plate-description]')?.value || '').trim(),
-  })).filter((plate) => plate.plateName);
-}
-function resetPlateRows(plates = []) {
-  if (!menuPlatesContainer) return;
-  menuPlatesContainer.innerHTML = '';
-  (Array.isArray(plates) && plates.length ? plates : [{}]).forEach(createPlateRow);
-  updatePlateRowsUi();
-  renderMenuPlatePreview();
-}
-function renderMenuPlatePreview() {
-  if (!menuPlatePreview) return;
-  const plates = getPlateRowsData();
-  menuPlatePreview.innerHTML = plates.length ? plates.map((plate) => `<span class="menu-plate-chip">${plate.plateName}</span>`).join('') : `<span class="preview-empty">No plates yet</span>`;
-}
-function renderMenuLibrary() {
-  if (!menuLibrary) {
-    return;
-  }
-
-  const menus = getStoredMenus();
-  if (!menus.length) {
-    menuLibrary.innerHTML = `<div class="empty-list">No menus yet</div>`;
-    return;
-  }
-
-  menuLibrary.innerHTML = menus.map((menu) => {
-    const normalizedPlates = Array.isArray(menu.plates)
-      ? menu.plates.map((plate) => normalizePlateObject(plate)).filter((plate) => plate.plateName)
-      : [];
-    const plateNames = normalizedPlates.map((plate) => plate.plateName);
-    const plateCount = Number(menu.plateCount || plateNames.length || 0);
-    const displayPanelId = `menu-display-${menu.id}`;
-    return `<article class="menu-library-item" data-menu-id="${menu.id}">
-      <div class="menu-library-top">
-        <span class="menu-library-name">${escapeHtml(menu.name)}</span>
-        <span class="menu-library-actions">
-          <button class="row-action-button row-details-button" type="button" data-menu-action="display" data-menu-id="${menu.id}" aria-expanded="false" aria-controls="${displayPanelId}">Display</button>
-          <button class="row-action-button row-edit-button" data-menu-action="edit" data-menu-id="${menu.id}">Edit</button>
-          <button class="row-action-button row-delete-button" data-menu-action="delete" data-menu-id="${menu.id}">Delete</button>
-        </span>
-      </div>
-      <div class="menu-library-meta">
-        <span class="menu-library-count">${plateCount} plates</span>
-      </div>
-      <div class="menu-library-plates">
-        ${plateNames.map((plate) => `<span class="menu-plate-chip">${escapeHtml(plate)}</span>`).join('')}
-      </div>
-      <div class="menu-display-panel hidden" id="${displayPanelId}" data-menu-display="${menu.id}">
-        <p class="menu-display-description">${menu.description ? escapeHtml(menu.description) : 'No menu description.'}</p>
-        <div class="menu-display-plates">
-          ${normalizedPlates.map((plate, index) => `<article class="menu-display-plate">
-            <span class="menu-display-plate-number">Plate ${index + 1}</span>
-            <h4>${escapeHtml(plate.plateName)}</h4>
-            ${plate.plateDescription ? `<p>${escapeHtml(plate.plateDescription)}</p>` : ''}
-          </article>`).join('')}
-        </div>
-      </div>
-    </article>`;
-  }).join('');
-}
-
-function syncMenuStyleOptions() {
-  if (!menuStyle) {
-    return;
-  }
-
-  const baseStyles = ['Seasonal Tasting', 'Vegetarian Menu', 'French Market', 'Private Dining'];
-  const menus = getStoredMenus();
-  const styles = Array.from(new Set([
-    ...baseStyles,
-    ...menus.map((menu) => menu.name)
-  ]));
-
-  const selected = menuStyle.value || baseStyles[0];
-  menuStyle.innerHTML = '';
-
-  styles.forEach((style) => {
-    const option = new Option(style, style);
-    menuStyle.add(option);
-  });
-
-  if (styles.includes(selected)) {
-    menuStyle.value = selected;
-  } else {
-    menuStyle.value = styles[0];
-  }
 }
 
 function renderTimeline(items) {
@@ -733,60 +356,6 @@ function renderCalendar(items) {
   }
 
   calendarGrid.innerHTML = cells.join('');
-}
-
-function listGroceriesForStyle(style) {
-  const groceries = {
-    'French Market': ['Market produce', 'Dairy', 'Bistro sauce'],
-    'Vegetarian Menu': ['Herbs', 'Root vegetables', 'Pulses'],
-    'Seasonal Tasting': ['Seasonal greens', 'Chef sauces', 'Market herbs'],
-    'Private Dining': ['Chef stocks', 'Fresh herbs', 'Service garnishes'],
-  };
-
-  return groceries[style] || ['Market produce', 'Kitchen herbs', 'Fresh sauces'];
-}
-
-function listChecklistForStyle(style) {
-  const checklists = {
-    'French Market': ['Market produce review', 'Sauce station', 'Plate finish'],
-    'Vegetarian Menu': ['Vegetable prep', 'Herb sauce check', 'Vegetarian garnish'],
-    'Seasonal Tasting': ['Produce check', 'Seasonal sauce', 'Final tasting'],
-    'Private Dining': ['Station layout', 'Service timing', 'Guest setup'],
-  };
-
-  return checklists[style] || ['Ingredient check', 'Station setup', 'Service call'];
-}
-
-function updateChefWorkflow(items) {
-  const focus = items.length ? items[0] : samples[0];
-  const prepOrder = document.getElementById('prepOrder');
-  const prepDetail = document.getElementById('prepDetail');
-  const groceryList = document.getElementById('groceryList');
-  const groceryDetail = document.getElementById('groceryDetail');
-  const serviceMenu = document.getElementById('serviceMenu');
-  const serviceDetail = document.getElementById('serviceDetail');
-  const prepChecklist = document.getElementById('prepChecklist');
-  const shoppingList = document.getElementById('shoppingList');
-
-  const groceries = listGroceriesForStyle(focus.style);
-  const checklist = listChecklistForStyle(focus.style);
-
-  if (prepOrder) prepOrder.textContent = `01 · ${focus.style}`;
-  if (prepDetail) prepDetail.textContent = `${focus.client} · ${focus.guests} guests`;
-  if (groceryList) groceryList.textContent = groceries.join(' · ');
-  if (groceryDetail) groceryDetail.textContent = `Budget €${focus.grocery || 0}`;
-  if (serviceMenu) serviceMenu.textContent = focus.style;
-  if (serviceDetail) serviceDetail.textContent = `${focus.guests} guests · ${formatMenuDate(focus.date)}`;
-  if (prepChecklist) {
-    prepChecklist.innerHTML = checklist
-      .map((step) => `<li>${step}</li>`)
-      .join('');
-  }
-  if (shoppingList) {
-    shoppingList.innerHTML = groceries
-      .map((item) => `<span class="shopping-item">${item}</span>`)
-      .join('');
-  }
 }
 
 function updateSummary(items) {
@@ -869,7 +438,7 @@ function fillFormForEdit(requestId) {
   }
 
   document.getElementById('clientName').value = request.client;
-  document.getElementById('menuStyle').value = request.style;
+  document.getElementById('requestTitle').value = request.style || '';
   document.getElementById('guestCount').value = request.guests;
   document.getElementById('eventDate').value = request.date;
   document.getElementById('menuPrice').value = request.price;
@@ -877,8 +446,6 @@ function fillFormForEdit(requestId) {
   document.getElementById('allergiesInput').value = request.allergies || '';
   document.getElementById('clientAddressInput').value = request.address || '';
   document.getElementById('eventTimeInput').value = request.eventTime || '19:00';
-  document.getElementById('requestPlatesInput').value = platesToArray(request.plates || getDefaultPlatesForStyle(request.style)).join(', ');
-
   if (menuDocumentInput) {
     menuDocumentInput.value = '';
     delete menuDocumentInput.dataset.removeExistingAttachment;
@@ -951,7 +518,7 @@ function renderBackupBanner() {
     banner.style.background = '#fff4d6';
     banner.style.color = '#6f5200';
     banner.style.border = '1px solid #f0d98c';
-    message.textContent = 'No backup has been created yet. Protect the menus and client requests by exporting a backup.';
+    message.textContent = 'No backup has been created yet. Protect the client requests by exporting a backup.';
     banner.append(message, exportButton);
   } else if (daysSinceBackup >= 14) {
     banner.style.background = '#fff4d6';
@@ -975,7 +542,6 @@ function exportBackup() {
     app: 'ChefOps Planner',
     version: 1,
     exportedAt: new Date().toISOString(),
-    menus: JSON.parse(localStorage.getItem(menuStorageKey) || '[]'),
     requests: JSON.parse(localStorage.getItem(storageKey) || '[]'),
   };
 
@@ -997,11 +563,10 @@ async function importBackupFile(file) {
   const text = await file.text();
   const backup = JSON.parse(text);
 
-  if (!backup || !Array.isArray(backup.menus) || !Array.isArray(backup.requests)) {
+  if (!backup || !Array.isArray(backup.requests)) {
     throw new Error('This is not a valid ChefOps backup file.');
   }
 
-  localStorage.setItem(menuStorageKey, JSON.stringify(backup.menus));
   localStorage.setItem(storageKey, JSON.stringify(backup.requests));
 
   const importedDate = backup.exportedAt && !Number.isNaN(new Date(backup.exportedAt).getTime())
@@ -1067,61 +632,24 @@ let requests = [];
 
 async function boot() {
   requests = await loadRequests();
-  menus = await loadMenus();
 
   renderMenus(requests);
   renderTimeline(requests);
   renderCalendar(requests);
   updateSummary(requests);
-  updateChefWorkflow(requests);
-  renderMenuLibrary();
-  syncMenuStyleOptions();
-  resetPlateRows();
   initializeBackupControls();
 }
 
 boot();
 
-if (menuStyle && requestPlatesInput) {
-  menuStyle.addEventListener('change', () => {
-    const style = menuStyle.value;
-    const defaultPlates = getDefaultPlatesForStyle(style);
-    const requestBeingEdited = menuForm?.dataset?.editingRequestId;
-
-    if (!requestBeingEdited) {
-      requestPlatesInput.value = defaultPlates.join(', ');
-    }
-  });
-}
-
-if (addMenuButton) {
-  addMenuButton.addEventListener('click', () => {
+addRequestButtons.forEach((button) => {
+  button.addEventListener('click', () => {
     if (menuForm) {
       menuForm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
     document.getElementById('clientName')?.focus();
   });
-}
-
-if (addMenuLibraryButton) {
-  addMenuLibraryButton.addEventListener('click', () => {
-    if (menuLibraryEditor) {
-      menuLibraryEditor.classList.remove('hidden');
-    }
-    if (menuNameInput) {
-      menuNameInput.value = '';
-      menuNameInput.focus();
-    }
-    if (menuDescriptionInput) {
-      menuDescriptionInput.value = '';
-    }
-    resetPlateRows();
-    delete menuLibraryEditor.dataset.editingMenuId;
-    if (saveMenuLibraryButton) {
-      saveMenuLibraryButton.textContent = 'Save Menu';
-    }
-  });
-}
+});
 
 async function openRequestAttachment(requestId) {
   try {
@@ -1163,10 +691,6 @@ function showRequestDetails(requestId) {
     return;
   }
 
-  const plates = Array.isArray(request.plates) && request.plates.length
-    ? request.plates
-    : getDefaultPlatesForStyle(request.style);
-
   const googleCalendarUrl = buildGoogleCalendarUrl(request);
 
   menuList.querySelectorAll('[data-request-details-card]').forEach((card) => {
@@ -1180,7 +704,7 @@ function showRequestDetails(requestId) {
     </div>
     <div class="request-details-grid">
       <div><span class="request-detail-label">Client</span><span class="request-detail-value">${request.client}</span></div>
-      <div><span class="request-detail-label">Menu</span><span class="request-detail-value">${request.style}</span></div>
+      <div><span class="request-detail-label">Event / Request</span><span class="request-detail-value">${request.style || 'Not set'}</span></div>
       <div><span class="request-detail-label">Guests</span><span class="request-detail-value">${request.guests}</span></div>
       <div><span class="request-detail-label">Event Date</span><span class="request-detail-value">${formatMenuDate(request.date)}</span></div>
       <div><span class="request-detail-label">Event Time</span><span class="request-detail-value">${request.eventTime || 'Not set'}</span></div>
@@ -1188,10 +712,6 @@ function showRequestDetails(requestId) {
       <div><span class="request-detail-label">Allergies</span><span class="request-detail-value">${request.allergies || 'None'}</span></div>
       <div><span class="request-detail-label">Price</span><span class="request-detail-value">€${request.price}</span></div>
       <div><span class="request-detail-label">Grocery Cost</span><span class="request-detail-value">€${request.grocery}</span></div>
-      <div class="request-detail-wide">
-        <span class="request-detail-label">Plates</span>
-        <span class="request-detail-value plates-detail">${plates.map((plate) => `<span class="menu-plate-chip">${plate}</span>`).join('')}</span>
-      </div>
       ${request.attachment ? `<div class="request-detail-wide">
         <span class="request-detail-label">Menu Document</span>
         <button type="button" class="attachment-open-button" data-open-request-attachment>
@@ -1247,7 +767,7 @@ if (resetRequestsButton) {
     }
 
     const confirmed = window.confirm(
-      'Delete all scheduled requests from this device? This resets events, grocery costs, and profit to zero. Saved menus will be kept.'
+      'Delete all scheduled requests and their attached menu documents from this device? This resets events, grocery costs, and profit to zero.'
     );
     if (!confirmed) {
       return;
@@ -1264,7 +784,6 @@ if (resetRequestsButton) {
     renderTimeline(requests);
     renderCalendar(requests);
     updateSummary(requests);
-    updateChefWorkflow(requests);
     clearEditMode();
     menuForm?.reset();
   });
@@ -1297,7 +816,6 @@ if (menuList) {
       renderTimeline(requests);
       renderCalendar(requests);
       updateSummary(requests);
-      updateChefWorkflow(requests);
       if (menuForm?.dataset?.editingRequestId === requestId) {
         clearEditMode();
         menuForm.reset();
@@ -1307,136 +825,6 @@ if (menuList) {
 
     if (action === 'edit') {
       fillFormForEdit(requestId);
-    }
-  });
-}
-
-if (addPlateRowButton) addPlateRowButton.addEventListener('click', () => createPlateRow());
-if (menuPlatesContainer) {
-  menuPlatesContainer.addEventListener('input', renderMenuPlatePreview);
-  menuPlatesContainer.addEventListener('click', (event) => {
-    const button = event.target.closest('[data-remove-plate]');
-    if (!button) return;
-    button.closest('.menu-plate-editor-row')?.remove();
-    if (!menuPlatesContainer.querySelector('.menu-plate-editor-row')) createPlateRow();
-    updatePlateRowsUi();
-    renderMenuPlatePreview();
-  });
-}
-
-if (menuLibrary) {
-  menuLibrary.addEventListener('click', async (event) => {
-    const actionButton = event.target.closest('[data-menu-action]');
-    if (!actionButton) {
-      return;
-    }
-
-    const menuId = actionButton.dataset.menuId;
-    const action = actionButton.dataset.menuAction;
-    const sourceMenus = getStoredMenus();
-
-    if (action === 'display') {
-      const targetCard = actionButton.closest('.menu-library-item');
-      const targetPanel = targetCard?.querySelector('[data-menu-display]');
-      if (!targetPanel) {
-        return;
-      }
-
-      const shouldOpen = targetPanel.classList.contains('hidden');
-      menuLibrary.querySelectorAll('[data-menu-display]').forEach((panel) => panel.classList.add('hidden'));
-      menuLibrary.querySelectorAll('[data-menu-action="display"]').forEach((button) => {
-        button.textContent = 'Display';
-        button.setAttribute('aria-expanded', 'false');
-      });
-
-      if (shouldOpen) {
-        targetPanel.classList.remove('hidden');
-        actionButton.textContent = 'Hide';
-        actionButton.setAttribute('aria-expanded', 'true');
-      }
-      return;
-    }
-
-    if (action === 'delete') {
-      const nextMenus = sourceMenus.filter((menu) => menu.id !== menuId);
-      menus = await saveMenus(nextMenus);
-      renderMenuLibrary();
-      syncMenuStyleOptions();
-      return;
-    }
-
-    if (action === 'edit') {
-      const target = sourceMenus.find((menu) => menu.id === menuId);
-      if (!target || !menuLibraryEditor || !menuNameInput || !menuPlatesContainer || !saveMenuLibraryButton) {
-        return;
-      }
-      menuLibraryEditor.dataset.editingMenuId = target.id;
-      menuNameInput.value = target.name;
-      menuDescriptionInput.value = target.description || '';
-      resetPlateRows(Array.isArray(target.plates) ? target.plates : []);
-      menuLibraryEditor.classList.remove('hidden');
-      saveMenuLibraryButton.textContent = 'Update Menu';
-      menuNameInput.focus();
-    }
-  });
-}
-
-if (saveMenuLibraryButton) {
-  saveMenuLibraryButton.addEventListener('click', async () => {
-    const sourceMenus = getStoredMenus();
-    const existingId = menuLibraryEditor?.dataset?.editingMenuId;
-    const name = menuNameInput.value.trim();
-    const description = menuDescriptionInput?.value.trim() || '';
-    const cleanPlates = getPlateRowsData();
-    const plateCount = cleanPlates.length;
-    if (!name || !cleanPlates.length) return;
-
-    const nextMenus = [...sourceMenus];
-    if (existingId) {
-      const idx = nextMenus.findIndex((menu) => menu.id === existingId);
-      if (idx >= 0) {
-        nextMenus[idx] = { ...nextMenus[idx], name, description, plates: cleanPlates, plateCount };
-      }
-    } else {
-      nextMenus.push({ id: 'menu-' + Date.now().toString(36), name, description, plates: cleanPlates, plateCount });
-    }
-
-    menus = await saveMenus(nextMenus);
-    renderMenuLibrary();
-    syncMenuStyleOptions();
-
-    if (menuLibraryEditor) {
-      menuLibraryEditor.classList.add('hidden');
-    }
-    if (menuNameInput) {
-      menuNameInput.value = '';
-    }
-    if (menuDescriptionInput) {
-      menuDescriptionInput.value = '';
-    }
-    resetPlateRows();
-    delete menuLibraryEditor?.dataset.editingMenuId;
-    if (saveMenuLibraryButton) {
-      saveMenuLibraryButton.textContent = 'Save Menu';
-    }
-  });
-}
-
-if (cancelMenuEditButton) {
-  cancelMenuEditButton.addEventListener('click', () => {
-    if (menuLibraryEditor) {
-      menuLibraryEditor.classList.add('hidden');
-    }
-    if (menuNameInput) {
-      menuNameInput.value = '';
-    }
-    if (menuDescriptionInput) {
-      menuDescriptionInput.value = '';
-    }
-    resetPlateRows();
-    delete menuLibraryEditor?.dataset.editingMenuId;
-    if (saveMenuLibraryButton) {
-      saveMenuLibraryButton.textContent = 'Save Menu';
     }
   });
 }
@@ -1493,7 +881,7 @@ if (menuForm) {
     event.preventDefault();
 
     const client = document.getElementById('clientName').value.trim();
-    const style = document.getElementById('menuStyle').value;
+    const style = document.getElementById('requestTitle').value.trim();
     const guests = Number(document.getElementById('guestCount').value);
     const date = document.getElementById('eventDate').value;
     const price = Number(document.getElementById('menuPrice').value);
@@ -1501,8 +889,6 @@ if (menuForm) {
     const allergies = document.getElementById('allergiesInput').value.trim();
     const address = document.getElementById('clientAddressInput').value.trim();
     const eventTime = document.getElementById('eventTimeInput').value;
-    const plates = platesToArray(requestPlatesInput?.value || getDefaultPlatesForStyle(style));
-
     if (!client || !style || !date || guests < 1 || price < 1 || grocery < 0) {
       return;
     }
@@ -1520,7 +906,7 @@ if (menuForm) {
 
     if (existingRequestId) {
       requests = requests.map((item) => item.id === existingRequestId
-        ? { ...item, client, style, guests, date, price, grocery, allergies, address, eventTime, plates, attachment }
+        ? { ...item, client, style, guests, date, price, grocery, allergies, address, eventTime, attachment }
         : item
       );
       savedRequest = requests.find((item) => item.id === existingRequestId);
@@ -1536,7 +922,6 @@ if (menuForm) {
         allergies,
         address,
         eventTime,
-        plates,
         attachment,
       };
 
@@ -1579,7 +964,6 @@ if (menuForm) {
     renderTimeline(requests);
     renderCalendar(requests);
     updateSummary(requests);
-    updateChefWorkflow(requests);
     menuForm.reset();
     clearEditMode();
   });

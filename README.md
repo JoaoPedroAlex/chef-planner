@@ -1,6 +1,6 @@
 # ChefOps Planner
 
-ChefOps Planner is a web application concept for a chef or culinary operations team to plan and manage daily workflow, client menu requests, grocery costs, and net profit calculations.
+ChefOps Planner is a web application concept for a chef or culinary operations team to manage client requests, event schedules, grocery costs, and net profit calculations.
 
 ## Project Vision
 
@@ -8,8 +8,9 @@ This application helps a chef manage:
 
 - Google Calendar integration for events and daily schedule
 - Daily operational workload and planning
-- Client-specific menu requests and preferences
-- Menu pricing, grocery cost inputs, and ingredient planning
+- Client requests, event details, and preferences
+- Menu-document attachments managed with each client request
+- Quoted prices and grocery cost inputs
 - Net profit calculation from revenue minus grocery costs
 
 ## Product Requirements
@@ -17,10 +18,10 @@ This application helps a chef manage:
 ### Core Features
 
 1. Dashboard for calendar, daily schedule, and workload
-2. Client menu request management with custom menus per client
-3. Menu price and grocery cost tracking
+2. Client request management with externally prepared menu-document attachments
+3. Quoted price and grocery cost tracking
 4. Net profit calculation and reporting
-5. Multi-client planning for chefs handling private menus, events, and catering work
+5. Multi-client planning for chefs handling private events and catering work
 
 ### Planned Technical Stack
 

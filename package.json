@@ -1,7 +1,7 @@
 {
   "name": "chef-planner",
   "version": "1.0.0",
-  "description": "ChefOps Planner is a web application concept for a chef or culinary operations team to plan and manage daily workflow, client menu requests, grocery costs, and net profit calculations.",
+  "description": "ChefOps Planner manages client requests, event schedules, attached menu documents, grocery costs, and net profit calculations.",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
