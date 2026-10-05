@@ -212,6 +212,16 @@
                   <input type="text" id="requestTitle" placeholder="e.g. Private dinner" required />
                 </label>
                 <label>
+                  <span class="field-label">Event Source</span>
+                  <select id="eventSource" required>
+                    <option value="" selected disabled>Choose a source</option>
+                    <option value="Take a Chef">Take a Chef</option>
+                    <option value="Chef La Maison">Chef La Maison</option>
+                    <option value="Airbnb">Airbnb</option>
+                    <option value="byhenrique">byhenrique</option>
+                  </select>
+                </label>
+                <label>
                   <span class="field-label">Guests</span>
                   <input type="number" id="guestCount" min="1" value="8" required />
                 </label>
@@ -332,7 +342,7 @@
     </main>
   </div>
 
-  <script src="app.js?v=20261005-4"></script>
+  <script src="app.js?v=20261005-5"></script>
   <script>
     (() => {
       let calendarViewDate = null;

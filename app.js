@@ -44,6 +44,7 @@ async function loadRequests() {
       allergies: item.allergies || '',
       address: item.address || '',
       eventTime: item.eventTime || '',
+      source: item.source || '',
     }));
   } catch (error) {
     console.warn('Unable to read requests from localStorage. Starting with an empty planner.', error);
@@ -217,6 +218,7 @@ function buildGoogleCalendarUrl(request) {
     'ChefOps Planner request',
     `Client: ${request.client || 'Unknown client'}`,
     `Request: ${request.style || 'Private event'}`,
+    request.source ? `Source: ${request.source}` : '',
     `Guests: ${request.guests || 0}`,
     request.attachment?.name ? `Menu document in ChefOps: ${request.attachment.name}` : '',
     `Price: €${request.price || 0}`,
@@ -260,7 +262,7 @@ function renderMenus(items) {
       <div class="menu-row" data-request-id="${item.id}">
         <div class="menu-row-main">
           <span class="menu-client">${item.client}</span>
-          <span class="menu-detail">${item.style} · ${item.guests} guests · ${formatMenuDate(item.date)}</span>
+          <span class="menu-detail">${item.style} · ${item.source || 'Source not set'} · ${item.guests} guests · ${formatMenuDate(item.date)}</span>
         </div>
         <div class="menu-row-meta">
           <span class="menu-price">€${item.price}</span>
@@ -439,6 +441,7 @@ function fillFormForEdit(requestId) {
 
   document.getElementById('clientName').value = request.client;
   document.getElementById('requestTitle').value = request.style || '';
+  document.getElementById('eventSource').value = request.source || '';
   document.getElementById('guestCount').value = request.guests;
   document.getElementById('eventDate').value = request.date;
   document.getElementById('menuPrice').value = request.price;
@@ -705,6 +708,7 @@ function showRequestDetails(requestId) {
     <div class="request-details-grid">
       <div><span class="request-detail-label">Client</span><span class="request-detail-value">${request.client}</span></div>
       <div><span class="request-detail-label">Event / Request</span><span class="request-detail-value">${request.style || 'Not set'}</span></div>
+      <div><span class="request-detail-label">Event Source</span><span class="request-detail-value">${request.source || 'Not set'}</span></div>
       <div><span class="request-detail-label">Guests</span><span class="request-detail-value">${request.guests}</span></div>
       <div><span class="request-detail-label">Event Date</span><span class="request-detail-value">${formatMenuDate(request.date)}</span></div>
       <div><span class="request-detail-label">Event Time</span><span class="request-detail-value">${request.eventTime || 'Not set'}</span></div>
@@ -898,6 +902,7 @@ if (menuForm) {
 
     const client = document.getElementById('clientName').value.trim();
     const style = document.getElementById('requestTitle').value.trim();
+    const source = document.getElementById('eventSource').value;
     const guests = Number(document.getElementById('guestCount').value);
     const date = document.getElementById('eventDate').value;
     const price = Number(document.getElementById('menuPrice').value);
@@ -905,7 +910,7 @@ if (menuForm) {
     const allergies = document.getElementById('allergiesInput').value.trim();
     const address = document.getElementById('clientAddressInput').value.trim();
     const eventTime = document.getElementById('eventTimeInput').value;
-    if (!client || !style || !date || guests < 1 || price < 1 || grocery < 0) {
+    if (!client || !style || !source || !date || guests < 1 || price < 1 || grocery < 0) {
       return;
     }
 
@@ -922,7 +927,7 @@ if (menuForm) {
 
     if (existingRequestId) {
       requests = requests.map((item) => item.id === existingRequestId
-        ? { ...item, client, style, guests, date, price, grocery, allergies, address, eventTime, attachment }
+        ? { ...item, client, style, source, guests, date, price, grocery, allergies, address, eventTime, attachment }
         : item
       );
       savedRequest = requests.find((item) => item.id === existingRequestId);
@@ -931,6 +936,7 @@ if (menuForm) {
         id: generateRequestId(),
         client,
         style,
+        source,
         guests,
         date,
         price,

@@ -8,7 +8,7 @@ This application helps a chef manage:
 
 - Google Calendar integration for events and daily schedule
 - Daily operational workload and planning
-- Client requests, event details, and preferences
+- Client requests, event details, source tracking, and preferences
 - Menu-document attachments managed with each client request
 - Quoted prices and grocery cost inputs
 - Net profit calculation from revenue minus grocery costs
