@@ -302,8 +302,8 @@ function renderTimeline(items) {
       <span class="time">${formatMenuDate(item.date)}</span>
       <span class="timeline-line"></span>
       <div class="timeline-content">
-        <span class="timeline-title">${item.style}</span>
-        <span class="timeline-detail">${item.client} · ${item.guests} guests</span>
+        <span class="timeline-title">${item.client || 'Client'}</span>
+        <span class="timeline-detail">${item.style || 'Private event'} · ${item.guests} guests</span>
       </div>
     </div>`;
   }).join('');
