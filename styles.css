@@ -558,11 +558,21 @@ h2 {
 
 .event-chip {
   display: block;
+  width: 100%;
   margin-top: 8px;
   padding: 4px 8px;
+  border: 0;
   border-radius: 20px;
+  font-family: inherit;
   font-size: 0.72rem;
   font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+}
+
+.event-chip:focus-visible {
+  outline: 2px solid var(--sage-forest);
+  outline-offset: 2px;
 }
 
 .event-green {

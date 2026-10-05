@@ -343,7 +343,7 @@ function renderCalendar(items) {
     const events = items.filter((item) => item.date === date);
     const dayChips = events.map((event, index) => {
       const palette = ['event-green', 'event-orange', 'event-blue', 'event-red'][index % 4];
-      return `<span class="event-chip ${palette}">${event.client || 'Client'}</span>`;
+      return `<button type="button" class="event-chip ${palette}" data-calendar-request-id="${escapeHtml(event.id)}" aria-label="View request details for ${escapeHtml(event.client || 'client')}">${escapeHtml(event.client || 'Client')}</button>`;
     }).join('');
 
     cells.push(`<div class="cal-day"><span class="day-number">${day}</span>${dayChips}</div>`);
@@ -739,6 +739,22 @@ function showRequestDetails(requestId) {
   });
 
   detailsCard.classList.remove('hidden');
+}
+
+if (calendarGrid) {
+  calendarGrid.addEventListener('click', (event) => {
+    const calendarEntry = event.target.closest('[data-calendar-request-id]');
+    if (!calendarEntry) {
+      return;
+    }
+
+    const requestId = calendarEntry.dataset.calendarRequestId;
+    showRequestDetails(requestId);
+
+    const requestRow = Array.from(menuList?.querySelectorAll('[data-request-row]') || [])
+      .find((row) => row.dataset.requestRow === requestId);
+    requestRow?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
 }
 
 const navLinks = Array.from(document.querySelectorAll('.nav-link'));
