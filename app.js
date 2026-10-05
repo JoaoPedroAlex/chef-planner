@@ -343,7 +343,7 @@ function renderCalendar(items) {
     const events = items.filter((item) => item.date === date);
     const dayChips = events.map((event, index) => {
       const palette = ['event-green', 'event-orange', 'event-blue', 'event-red'][index % 4];
-      return `<span class="event-chip ${palette}">${event.style}</span>`;
+      return `<span class="event-chip ${palette}">${event.client || 'Client'}</span>`;
     }).join('');
 
     cells.push(`<div class="cal-day"><span class="day-number">${day}</span>${dayChips}</div>`);
