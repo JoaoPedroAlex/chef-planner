@@ -716,6 +716,23 @@ select {
   flex: 0 0 auto;
 }
 
+.calendar-availability-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+
+.calendar-availability-status {
+  color: var(--text-soft);
+  font-size: 0.78rem;
+}
+
+.calendar-availability-field button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .menu-document-field {
   display: flex;
   flex-direction: column;

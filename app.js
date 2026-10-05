@@ -8,6 +8,10 @@ const calendarMonthTitle = document.querySelector('.month-title');
 const addRequestButtons = document.querySelectorAll('#addRequestButton, [data-add-request-button]');
 const resetRequestsButton = document.getElementById('resetRequestsButton');
 const addToGoogleCalendarInput = document.getElementById('addToGoogleCalendarInput');
+const checkGoogleAvailabilityButton = document.getElementById('checkGoogleAvailabilityButton');
+const calendarAvailabilityStatus = document.getElementById('calendarAvailabilityStatus');
+const eventDateInput = document.getElementById('eventDate');
+const eventTimeInput = document.getElementById('eventTimeInput');
 const menuDocumentInput = document.getElementById('menuDocumentInput');
 const menuDocumentStatus = document.getElementById('menuDocumentStatus');
 const removeMenuDocumentButton = document.getElementById('removeMenuDocumentButton');
@@ -195,6 +199,28 @@ function formatLocalDateKey(date) {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+function buildGoogleCalendarDayUrl(dateValue) {
+  const [year, month, day] = String(dateValue || '').split('-').map(Number);
+  if (!year || !month || !day) {
+    return 'https://calendar.google.com/calendar/u/0/r/day';
+  }
+
+  return `https://calendar.google.com/calendar/u/0/r/day/${year}/${month}/${day}`;
+}
+
+function updateGoogleAvailabilityControl() {
+  if (!checkGoogleAvailabilityButton || !calendarAvailabilityStatus) {
+    return;
+  }
+
+  const selectedDate = eventDateInput?.value;
+  const selectedTime = eventTimeInput?.value;
+  checkGoogleAvailabilityButton.disabled = !selectedDate;
+  calendarAvailabilityStatus.textContent = selectedDate
+    ? `Review the chef's schedule for ${formatMenuDate(selectedDate)}${selectedTime ? ` at ${selectedTime}` : ''}.`
+    : 'Choose an event date first.';
 }
 
 function escapeHtml(value) {
@@ -449,6 +475,7 @@ function fillFormForEdit(requestId) {
   document.getElementById('allergiesInput').value = request.allergies || '';
   document.getElementById('clientAddressInput').value = request.address || '';
   document.getElementById('eventTimeInput').value = request.eventTime || '19:00';
+  updateGoogleAvailabilityControl();
   if (menuDocumentInput) {
     menuDocumentInput.value = '';
     delete menuDocumentInput.dataset.removeExistingAttachment;
@@ -653,6 +680,25 @@ addRequestButtons.forEach((button) => {
     document.getElementById('clientName')?.focus();
   });
 });
+
+eventDateInput?.addEventListener('change', updateGoogleAvailabilityControl);
+eventTimeInput?.addEventListener('change', updateGoogleAvailabilityControl);
+checkGoogleAvailabilityButton?.addEventListener('click', () => {
+  if (!eventDateInput?.value) {
+    return;
+  }
+
+  const calendarWindow = window.open(
+    buildGoogleCalendarDayUrl(eventDateInput.value),
+    '_blank'
+  );
+  if (calendarWindow) {
+    calendarWindow.opener = null;
+  } else {
+    window.alert('The Google Calendar window was blocked. Allow pop-ups and try again.');
+  }
+});
+updateGoogleAvailabilityControl();
 
 async function openRequestAttachment(requestId) {
   try {
@@ -897,6 +943,10 @@ if (removeMenuDocumentButton) {
 }
 
 if (menuForm) {
+  menuForm.addEventListener('reset', () => {
+    window.setTimeout(updateGoogleAvailabilityControl, 0);
+  });
+
   menuForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
