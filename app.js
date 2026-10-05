@@ -482,8 +482,8 @@ function buildGoogleCalendarUrl(request) {
     `Guests: ${request.guests || 0}`,
     plateNames.length ? `Plates: ${plateNames.join(', ')}` : '',
     request.attachment?.name ? `Menu document in ChefOps: ${request.attachment.name}` : '',
-    `Price: $${request.price || 0}`,
-    `Grocery: $${request.grocery || 0}`,
+    `Price: €${request.price || 0}`,
+    `Grocery: €${request.grocery || 0}`,
     request.allergies ? `Allergies: ${request.allergies}` : '',
   ].filter(Boolean).join('\n');
 
@@ -526,9 +526,9 @@ function renderMenus(items) {
           <span class="menu-detail">${item.style} · ${item.guests} guests · ${formatMenuDate(item.date)}</span>
         </div>
         <div class="menu-row-meta">
-          <span class="menu-price">$${item.price}</span>
-          <span class="menu-cost">Cost $${item.grocery}</span>
-          <span class="menu-profit">Profit $${profit}</span>
+          <span class="menu-price">€${item.price}</span>
+          <span class="menu-cost">Cost €${item.grocery}</span>
+          <span class="menu-profit">Profit €${profit}</span>
         </div>
         <div class="menu-row-actions">
           <button class="row-action-button row-details-button" data-action="details" data-request-id="${item.id}">Details</button>
@@ -774,7 +774,7 @@ function updateChefWorkflow(items) {
   if (prepOrder) prepOrder.textContent = `01 · ${focus.style}`;
   if (prepDetail) prepDetail.textContent = `${focus.client} · ${focus.guests} guests`;
   if (groceryList) groceryList.textContent = groceries.join(' · ');
-  if (groceryDetail) groceryDetail.textContent = `Budget $${focus.grocery || 0}`;
+  if (groceryDetail) groceryDetail.textContent = `Budget €${focus.grocery || 0}`;
   if (serviceMenu) serviceMenu.textContent = focus.style;
   if (serviceDetail) serviceDetail.textContent = `${focus.guests} guests · ${formatMenuDate(focus.date)}`;
   if (prepChecklist) {
@@ -820,9 +820,9 @@ function updateSummary(items) {
 
   if (requestCount) requestCount.textContent = String(items.length);
   if (eventsCount) eventsCount.textContent = String(items.length).padStart(2, '0');
-  if (groceryCost) groceryCost.textContent = '$' + totalCost.toFixed(2);
-  if (profitTotal) profitTotal.textContent = '$' + totalProfit.toLocaleString();
-  if (profitBig) profitBig.textContent = '$' + totalProfit.toLocaleString();
+  if (groceryCost) groceryCost.textContent = '€' + totalCost.toFixed(2);
+  if (profitTotal) profitTotal.textContent = '€' + totalProfit.toLocaleString();
+  if (profitBig) profitBig.textContent = '€' + totalProfit.toLocaleString();
   if (todayDate) {
     todayDate.textContent = now.toLocaleDateString(undefined, {
       weekday: 'long',
@@ -1186,8 +1186,8 @@ function showRequestDetails(requestId) {
       <div><span class="request-detail-label">Event Time</span><span class="request-detail-value">${request.eventTime || 'Not set'}</span></div>
       <div><span class="request-detail-label">Address</span><span class="request-detail-value">${request.address || 'Not set'}</span></div>
       <div><span class="request-detail-label">Allergies</span><span class="request-detail-value">${request.allergies || 'None'}</span></div>
-      <div><span class="request-detail-label">Price</span><span class="request-detail-value">$${request.price}</span></div>
-      <div><span class="request-detail-label">Grocery Cost</span><span class="request-detail-value">$${request.grocery}</span></div>
+      <div><span class="request-detail-label">Price</span><span class="request-detail-value">€${request.price}</span></div>
+      <div><span class="request-detail-label">Grocery Cost</span><span class="request-detail-value">€${request.grocery}</span></div>
       <div class="request-detail-wide">
         <span class="request-detail-label">Plates</span>
         <span class="request-detail-value plates-detail">${plates.map((plate) => `<span class="menu-plate-chip">${plate}</span>`).join('')}</span>
