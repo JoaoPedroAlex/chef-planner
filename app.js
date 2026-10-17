@@ -316,12 +316,14 @@ function renderTimeline(items) {
     return;
   }
 
+  const todayKey = formatLocalDateKey(new Date());
   const sorted = [...items]
+    .filter((item) => item.date >= todayKey)
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(0, 4);
 
   if (!sorted.length) {
-    timeline.innerHTML = `<div class="timeline-item empty-timeline"><span class="timeline-title">No events scheduled</span></div>`;
+    timeline.innerHTML = `<div class="timeline-item empty-timeline"><span class="timeline-title">No upcoming events scheduled</span></div>`;
     return;
   }
 

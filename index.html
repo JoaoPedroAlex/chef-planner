@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ChefOps Planner</title>
-  <link rel="stylesheet" href="styles.css?v=20261005-3" />
+  <link rel="stylesheet" href="styles.css?v=20261017-1" />
   <link rel="manifest" href="manifest.json" />
 </head>
 <body>
@@ -121,30 +121,6 @@
       </section>
 
       <section class="workspace-grid">
-        <article class="panel calendar-panel" id="calendar">
-          <div class="panel-header">
-            <div>
-              <span class="panel-kicker">Schedule</span>
-              <h2>Calendar</h2>
-            </div>
-            <div class="panel-actions">
-              <button class="icon-button" id="prevMonthButton" type="button" aria-label="Previous month">‹</button>
-              <span class="month-title">September 2026</span>
-              <button class="icon-button" id="nextMonthButton" type="button" aria-label="Next month">›</button>
-            </div>
-          </div>
-
-          <div class="calendar-grid" id="calendarGrid">
-            <div class="cal-head">Mon</div>
-            <div class="cal-head">Tue</div>
-            <div class="cal-head">Wed</div>
-            <div class="cal-head">Thu</div>
-            <div class="cal-head">Fri</div>
-            <div class="cal-head">Sat</div>
-            <div class="cal-head">Sun</div>
-          </div>
-        </article>
-
         <article class="panel workload-panel">
           <div class="panel-header compact">
             <div>
@@ -186,6 +162,30 @@
                 <span class="timeline-detail">4 clients / 2 courses</span>
               </div>
             </div>
+          </div>
+        </article>
+
+        <article class="panel calendar-panel" id="calendar">
+          <div class="panel-header">
+            <div>
+              <span class="panel-kicker">Schedule</span>
+              <h2>Calendar</h2>
+            </div>
+            <div class="panel-actions">
+              <button class="icon-button" id="prevMonthButton" type="button" aria-label="Previous month">‹</button>
+              <span class="month-title">September 2026</span>
+              <button class="icon-button" id="nextMonthButton" type="button" aria-label="Next month">›</button>
+            </div>
+          </div>
+
+          <div class="calendar-grid" id="calendarGrid">
+            <div class="cal-head">Mon</div>
+            <div class="cal-head">Tue</div>
+            <div class="cal-head">Wed</div>
+            <div class="cal-head">Thu</div>
+            <div class="cal-head">Fri</div>
+            <div class="cal-head">Sat</div>
+            <div class="cal-head">Sun</div>
           </div>
         </article>
       </section>
@@ -348,7 +348,7 @@
     </main>
   </div>
 
-  <script src="app.js?v=20261005-6"></script>
+  <script src="app.js?v=20261017-1"></script>
   <script>
     (() => {
       let calendarViewDate = null;
