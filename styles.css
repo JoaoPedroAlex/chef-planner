@@ -463,9 +463,13 @@ h2 {
 
 .workspace-grid {
   display: grid;
-  grid-template-columns: minmax(340px, 1fr) minmax(560px, 2fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
   margin-top: 20px;
+}
+
+.top-workload-panel {
+  margin-bottom: 20px;
 }
 
 .panel {

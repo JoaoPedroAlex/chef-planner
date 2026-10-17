@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ChefOps Planner</title>
-  <link rel="stylesheet" href="styles.css?v=20261017-1" />
+  <link rel="stylesheet" href="styles.css?v=20261017-2" />
   <link rel="manifest" href="manifest.json" />
 </head>
 <body>
@@ -59,6 +59,50 @@
     </aside>
 
     <main class="main-content">
+      <article class="panel workload-panel top-workload-panel">
+        <div class="panel-header compact">
+          <div>
+            <span class="panel-kicker">Daily Work</span>
+            <h2>Workload</h2>
+          </div>
+          <button class="icon-button small-icon">+</button>
+        </div>
+        <div class="timeline" id="timeline">
+          <div class="timeline-item">
+            <span class="time">08:30</span>
+            <span class="timeline-line"></span>
+            <div class="timeline-content">
+              <span class="timeline-title">Groceries delivery</span>
+              <span class="timeline-detail">Farm market pickup</span>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span class="time">11:00</span>
+            <span class="timeline-line"></span>
+            <div class="timeline-content">
+              <span class="timeline-title">Savory Table</span>
+              <span class="timeline-detail">Client follow-up · 8 guests</span>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span class="time">14:30</span>
+            <span class="timeline-line"></span>
+            <div class="timeline-content">
+              <span class="timeline-title">Kitchen prep</span>
+              <span class="timeline-detail">Set service station</span>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span class="time">19:00</span>
+            <span class="timeline-line"></span>
+            <div class="timeline-content">
+              <span class="timeline-title">Dinner service</span>
+              <span class="timeline-detail">4 clients / 2 courses</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
       <section class="topbar">
         <div>
           <span class="section-label">Operations</span>
@@ -121,50 +165,6 @@
       </section>
 
       <section class="workspace-grid">
-        <article class="panel workload-panel">
-          <div class="panel-header compact">
-            <div>
-              <span class="panel-kicker">Daily Work</span>
-              <h2>Workload</h2>
-            </div>
-            <button class="icon-button small-icon">+</button>
-          </div>
-          <div class="timeline" id="timeline">
-            <div class="timeline-item">
-              <span class="time">08:30</span>
-              <span class="timeline-line"></span>
-              <div class="timeline-content">
-                <span class="timeline-title">Groceries delivery</span>
-                <span class="timeline-detail">Farm market pickup</span>
-              </div>
-            </div>
-            <div class="timeline-item">
-              <span class="time">11:00</span>
-              <span class="timeline-line"></span>
-              <div class="timeline-content">
-                <span class="timeline-title">Savory Table</span>
-                <span class="timeline-detail">Client follow-up · 8 guests</span>
-              </div>
-            </div>
-            <div class="timeline-item">
-              <span class="time">14:30</span>
-              <span class="timeline-line"></span>
-              <div class="timeline-content">
-                <span class="timeline-title">Kitchen prep</span>
-                <span class="timeline-detail">Set service station</span>
-              </div>
-            </div>
-            <div class="timeline-item">
-              <span class="time">19:00</span>
-              <span class="timeline-line"></span>
-              <div class="timeline-content">
-                <span class="timeline-title">Dinner service</span>
-                <span class="timeline-detail">4 clients / 2 courses</span>
-              </div>
-            </div>
-          </div>
-        </article>
-
         <article class="panel calendar-panel" id="calendar">
           <div class="panel-header">
             <div>
