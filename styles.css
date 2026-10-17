@@ -615,6 +615,29 @@ h2 {
   border-bottom: none;
 }
 
+.timeline-event-button {
+  width: 100%;
+  border-top: 0;
+  border-right: 0;
+  border-left: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 180ms ease;
+}
+
+.timeline-event-button:hover {
+  background: var(--sage-light);
+}
+
+.timeline-event-button:focus-visible {
+  outline: 2px solid var(--sage-green-dark);
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
 .timeline-line {
   width: 2px;
   height: 40px;

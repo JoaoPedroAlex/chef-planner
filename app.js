@@ -328,14 +328,14 @@ function renderTimeline(items) {
   }
 
   timeline.innerHTML = sorted.map((item) => {
-    return `<div class="timeline-item">
+    return `<button type="button" class="timeline-item timeline-event-button" data-workload-request-id="${escapeHtml(item.id)}" aria-label="View details for ${escapeHtml(item.client || 'client')}">
       <span class="time">${formatMenuDate(item.date)}</span>
       <span class="timeline-line"></span>
       <div class="timeline-content">
-        <span class="timeline-title">${item.client || 'Client'}</span>
-        <span class="timeline-detail">${item.style || 'Private event'} · ${item.guests} guests</span>
+        <span class="timeline-title">${escapeHtml(item.client || 'Client')}</span>
+        <span class="timeline-detail">${escapeHtml(item.style || 'Private event')} · ${item.guests} guests</span>
       </div>
-    </div>`;
+    </button>`;
   }).join('');
 }
 
@@ -801,6 +801,22 @@ if (calendarGrid) {
     }
 
     const requestId = calendarEntry.dataset.calendarRequestId;
+    showRequestDetails(requestId);
+
+    const requestRow = Array.from(menuList?.querySelectorAll('[data-request-row]') || [])
+      .find((row) => row.dataset.requestRow === requestId);
+    requestRow?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+}
+
+if (timeline) {
+  timeline.addEventListener('click', (event) => {
+    const workloadEntry = event.target.closest('[data-workload-request-id]');
+    if (!workloadEntry) {
+      return;
+    }
+
+    const requestId = workloadEntry.dataset.workloadRequestId;
     showRequestDetails(requestId);
 
     const requestRow = Array.from(menuList?.querySelectorAll('[data-request-row]') || [])
